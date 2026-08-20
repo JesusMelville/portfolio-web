@@ -1,0 +1,16 @@
+.footer {
+    padding: 2rem;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.footerContent {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.copyright {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
