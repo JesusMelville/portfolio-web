@@ -3,7 +3,7 @@ export const profile = {
     title: 'Desarrollador Web Full Stack',
     bio: 'Creo aplicaciones web modernas y escalables. Apasionado por el codigo limpio, las buenas practicas y la experiencia de usuario.',
     location: 'Rep Dominicana',
-    email: 'jesusmelville@gmail.com',
+    email: 'jesusmelvillemm@gmail.com',
     github: 'https://github.com/JesusMelville',
     avatar: 'https://avatars.githubusercontent.com/u/222508878'
 };
