@@ -1,4 +1,4 @@
-import { profile } from '@data/profile';
+import { profile, stats } from '@data/profile';
 import styles from '@styles/components/organisms/Hero.module.css';
 
 export function Hero() {
@@ -11,6 +11,15 @@ export function Hero() {
                     <h2 className={styles.title}>{profile.title}</h2>
                     <p className={styles.bio}>{profile.bio}</p>
                     
+                    <div className={styles.stats}>
+                        {stats.map((stat, index) => (
+                            <div key={index} className={styles.statItem}>
+                                <span className={styles.statValue}>{stat.value}</span>
+                                <span className={styles.statLabel}>{stat.label}</span>
+                            </div>
+                        ))}
+                    </div>
+
                     <div className={styles.actions}>
                         <a href="#proyectos" className={styles.primaryButton}>
                             Ver proyectos
@@ -23,6 +32,7 @@ export function Hero() {
 
                 <div className={styles.heroImage}>
                     <img src={profile.avatar} alt={profile.name} className={styles.avatar} />
+                    <div className={styles.avatarGlow}></div>
                 </div>
             </div>
         </section>

@@ -1,17 +1,65 @@
 .projects {
-    padding: 4rem 0;
+    padding: 5rem 0;
 }
 
 .sectionTitle {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: var(--text-primary);
     text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+}
+
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
     margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.filterButton {
+    padding: 0.625rem 1.25rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 9999px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.filterButton:hover {
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+}
+
+.filterActive {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
 }
 
 .projectsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .sectionTitle {
+        font-size: 2rem;
+    }
+
+    .projectsGrid {
+        grid-template-columns: 1fr;
+    }
 }
