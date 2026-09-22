@@ -43,7 +43,7 @@ export function CertCard({ cert, onViewCert }) {
             <div className={styles.skillsSection}>
                 <span className={styles.skillsLabel}>Competencias avaladas:</span>
                 <div className={styles.skillsList}>
-                    {cert.skills && cert.skills.map((skill) => (
+                    {(Array.isArray(cert.skills) ? cert.skills : (typeof cert.skills === 'string' ? cert.skills.split(',').map(s => s.trim()).filter(Boolean) : [])).map((skill) => (
                         <span key={skill} className={styles.skillTag}>
                             {skill}
                         </span>

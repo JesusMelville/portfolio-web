@@ -62,14 +62,23 @@ export function ProjectCard({ project, onOpenDetails }) {
 
             <div className={styles.cardFooter}>
                 <div className={styles.tags}>
-                    {project.tags.slice(0, 4).map((tag) => (
-                        <span key={tag} className={styles.tag}>
-                            {tag}
-                        </span>
-                    ))}
-                    {project.tags.length > 4 && (
-                        <span className={styles.tagMore}>+{project.tags.length - 4}</span>
-                    )}
+                    {(() => {
+                        const tagsList = Array.isArray(project.tags)
+                            ? project.tags
+                            : (typeof project.tags === 'string' ? project.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
+                        return (
+                            <>
+                                {tagsList.slice(0, 4).map((tag) => (
+                                    <span key={tag} className={styles.tag}>
+                                        {tag}
+                                    </span>
+                                ))}
+                                {tagsList.length > 4 && (
+                                    <span className={styles.tagMore}>+{tagsList.length - 4}</span>
+                                )}
+                            </>
+                        );
+                    })()}
                 </div>
 
                 <div className={styles.actionRow}>

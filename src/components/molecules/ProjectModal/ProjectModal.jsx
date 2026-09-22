@@ -79,7 +79,7 @@ export function ProjectModal({ project, onClose }) {
                     <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Stack Tecnológico</h4>
                         <div className={styles.tagsGrid}>
-                            {project.tags && project.tags.map((tag) => (
+                            {(Array.isArray(project.tags) ? project.tags : (typeof project.tags === 'string' ? project.tags.split(',').map(t => t.trim()).filter(Boolean) : [])).map((tag) => (
                                 <Badge key={tag} variant="default" size="md">
                                     {tag}
                                 </Badge>

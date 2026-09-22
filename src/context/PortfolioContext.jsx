@@ -20,7 +20,17 @@ export function PortfolioProvider({ children }) {
     const [projects, setProjects] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
-            if (saved) return JSON.parse(saved);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(p => ({
+                        ...p,
+                        tags: Array.isArray(p.tags)
+                            ? p.tags
+                            : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : [])
+                    }));
+                }
+            }
         } catch (e) {
             console.error('Error loading projects from localStorage', e);
         }
@@ -31,7 +41,17 @@ export function PortfolioProvider({ children }) {
     const [certifications, setCertifications] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEYS.CERTS);
-            if (saved) return JSON.parse(saved);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(c => ({
+                        ...c,
+                        skills: Array.isArray(c.skills)
+                            ? c.skills
+                            : (typeof c.skills === 'string' ? c.skills.split(',').map(s => s.trim()).filter(Boolean) : [])
+                    }));
+                }
+            }
         } catch (e) {
             console.error('Error loading certifications from localStorage', e);
         }
@@ -136,11 +156,26 @@ export function PortfolioProvider({ children }) {
 
     // --- Certification CRUD ---
     const addCertification = (newCert) => {
+        const skills = Array.isArray(newCert.skills)
+            ? newCert.skills
+            : (typeof newCert.skills === 'string' ? newCert.skills.split(',').map(s => s.trim()).filter(Boolean) : []);
+
         const certWithId = {
-            id: `cert-${Date.now()}`,
-            date: newCert.date || new Date().getFullYear().toString(),
-            skills: Array.isArray(newCert.skills) ? newCert.skills : (newCert.skills || '').split(',').map(s => s.trim()).filter(Boolean),
-            ...newCert
+            title: '',
+            issuer: '',
+            date: new Date().getFullYear().toString(),
+            credentialId: '',
+            url: '',
+            category: 'frontend',
+            badgeColor: '#8b5cf6',
+            description: '',
+            certificateFile: null,
+            certificateImage: null,
+            fileName: '',
+            fileType: 'image',
+            ...newCert,
+            id: newCert.id || `cert-${Date.now()}`,
+            skills
         };
         setCertifications(prev => [certWithId, ...prev]);
         return certWithId;
@@ -149,9 +184,11 @@ export function PortfolioProvider({ children }) {
     const updateCertification = (id, updatedData) => {
         setCertifications(prev => prev.map(cert => {
             if (cert.id === id) {
-                const skills = Array.isArray(updatedData.skills)
-                    ? updatedData.skills
-                    : (updatedData.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+                const skills = updatedData.skills !== undefined
+                    ? (Array.isArray(updatedData.skills)
+                        ? updatedData.skills
+                        : (typeof updatedData.skills === 'string' ? updatedData.skills.split(',').map(s => s.trim()).filter(Boolean) : []))
+                    : cert.skills;
                 return { ...cert, ...updatedData, skills };
             }
             return cert;
@@ -164,20 +201,24 @@ export function PortfolioProvider({ children }) {
 
     // --- Project CRUD & Controls ---
     const addProject = (newProject) => {
+        const tags = Array.isArray(newProject.tags)
+            ? newProject.tags
+            : (typeof newProject.tags === 'string' ? newProject.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
+
         const projectWithId = {
-            id: `proj-${Date.now()}`,
-            title: newProject.title || 'Nuevo Proyecto',
-            subtitle: newProject.subtitle || '',
-            description: newProject.description || '',
-            tags: Array.isArray(newProject.tags) ? newProject.tags : (newProject.tags || '').split(',').map(t => t.trim()).filter(Boolean),
-            category: newProject.category || 'frontend',
-            featured: Boolean(newProject.featured),
+            title: 'Nuevo Proyecto',
+            subtitle: '',
+            description: '',
+            category: 'frontend',
+            featured: false,
             visible: true,
-            github: newProject.github || '',
-            demo: newProject.demo || '',
-            color: newProject.color || '#8b5cf6',
+            github: '',
+            demo: '',
+            color: '#8b5cf6',
             isFromGitHub: false,
-            ...newProject
+            ...newProject,
+            id: newProject.id || `proj-${Date.now()}`,
+            tags
         };
         setProjects(prev => [projectWithId, ...prev]);
         return projectWithId;
@@ -186,9 +227,11 @@ export function PortfolioProvider({ children }) {
     const updateProject = (id, updatedData) => {
         setProjects(prev => prev.map(p => {
             if (p.id === id || p.name === id) {
-                const tags = Array.isArray(updatedData.tags)
-                    ? updatedData.tags
-                    : (updatedData.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+                const tags = updatedData.tags !== undefined
+                    ? (Array.isArray(updatedData.tags)
+                        ? updatedData.tags
+                        : (typeof updatedData.tags === 'string' ? updatedData.tags.split(',').map(t => t.trim()).filter(Boolean) : []))
+                    : p.tags;
                 return { ...p, ...updatedData, tags };
             }
             return p;
