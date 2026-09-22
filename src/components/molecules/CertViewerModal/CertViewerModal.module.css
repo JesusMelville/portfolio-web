@@ -28,11 +28,16 @@
     flex-direction: column;
 }
 
+.pdfModal {
+    max-width: 950px;
+    height: 90vh;
+}
+
 .header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-card);
 }
@@ -41,6 +46,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+}
+
+.badgesWrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .title {
@@ -74,16 +85,19 @@
 }
 
 .body {
-    padding: 1.5rem;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 250px;
-    background: #000;
+    flex: 1;
+    min-height: 350px;
+    background: #0f1015;
+    overflow: hidden;
 }
 
 .imageContainer {
     width: 100%;
+    padding: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -91,10 +105,24 @@
 
 .certImage {
     max-width: 100%;
-    max-height: 60vh;
+    max-height: 65vh;
     object-fit: contain;
     border-radius: var(--radius-sm);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.pdfContainer {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+    display: flex;
+}
+
+.pdfIframe {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+    border: none;
 }
 
 .noImagePlaceholder {
@@ -125,6 +153,15 @@
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-color);
     background: var(--bg-card);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.footerLeftActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 @keyframes fadeIn {

@@ -55,6 +55,23 @@
     transition: transform var(--transition-normal);
 }
 
+.pdfCardTile {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--bg-surface);
+}
+
+.pdfTileText {
+    font-size: 0.775rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
 .thumbWrapper:hover .thumbImg {
     transform: scale(1.05);
 }

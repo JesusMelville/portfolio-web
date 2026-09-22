@@ -14,13 +14,18 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
         skills: '',
         badgeColor: '#8b5cf6',
         description: '',
-        certificateImage: null
+        certificateFile: null,
+        fileName: '',
+        fileType: 'image' // 'image' | 'pdf'
     });
 
-    const [imagePreview, setImagePreview] = useState(null);
+    const [filePreview, setFilePreview] = useState(null);
 
     useEffect(() => {
         if (cert) {
+            const certFile = cert.certificateFile || cert.certificateImage || null;
+            const isPdf = certFile && (certFile.startsWith('data:application/pdf') || cert.fileType === 'pdf');
+
             setFormData({
                 title: cert.title || '',
                 issuer: cert.issuer || '',
@@ -31,9 +36,11 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                 skills: Array.isArray(cert.skills) ? cert.skills.join(', ') : (cert.skills || ''),
                 badgeColor: cert.badgeColor || '#8b5cf6',
                 description: cert.description || '',
-                certificateImage: cert.certificateImage || null
+                certificateFile: certFile,
+                fileName: cert.fileName || (isPdf ? 'documento-certificado.pdf' : 'comprobante-imagen'),
+                fileType: isPdf ? 'pdf' : 'image'
             });
-            setImagePreview(cert.certificateImage || null);
+            setFilePreview(certFile);
         } else {
             setFormData({
                 title: '',
@@ -45,9 +52,11 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                 skills: '',
                 badgeColor: '#8b5cf6',
                 description: '',
-                certificateImage: null
+                certificateFile: null,
+                fileName: '',
+                fileType: 'image'
             });
-            setImagePreview(null);
+            setFilePreview(null);
         }
     }, [cert, isOpen]);
 
@@ -67,23 +76,39 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
     const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                alert('El archivo es demasiado grande (máximo 2MB para almacenamiento local).');
+            if (file.size > 3 * 1024 * 1024) {
+                alert('El archivo es demasiado grande (máximo 3MB para almacenamiento local).');
                 return;
             }
+
+            const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            const detectedType = isPdf ? 'pdf' : 'image';
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Data = reader.result;
-                setImagePreview(base64Data);
-                setFormData(prev => ({ ...prev, certificateImage: base64Data }));
+                setFilePreview(base64Data);
+                setFormData(prev => ({
+                    ...prev,
+                    certificateFile: base64Data,
+                    certificateImage: base64Data, // backward compatibility
+                    fileName: file.name,
+                    fileType: detectedType
+                }));
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const handleRemoveImage = () => {
-        setImagePreview(null);
-        setFormData(prev => ({ ...prev, certificateImage: null }));
+    const handleRemoveFile = () => {
+        setFilePreview(null);
+        setFormData(prev => ({
+            ...prev,
+            certificateFile: null,
+            certificateImage: null,
+            fileName: '',
+            fileType: 'image'
+        }));
     };
 
     const handleSubmit = (e) => {
@@ -93,6 +118,8 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
     };
 
     if (!isOpen) return null;
+
+    const isPdf = formData.fileType === 'pdf' || (filePreview && filePreview.startsWith('data:application/pdf'));
 
     return (
         <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true">
@@ -107,7 +134,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                                 {cert ? 'Editar Certificación' : 'Subir Nueva Certificación'}
                             </h3>
                             <p className={styles.modalSubtitle}>
-                                Añade los datos y comprobante oficial de tu certificado
+                                Añade los datos y comprobante oficial (PDF, PNG, JPG) de tu certificado
                             </p>
                         </div>
                     </div>
@@ -193,33 +220,51 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                             placeholder="Detalla las competencias clave adquiridas en este curso o certificación..."
                         />
 
-                        {/* Upload Certificate Image / Proof */}
+                        {/* Upload Certificate Image / PDF Proof */}
                         <div className={styles.uploadSection}>
-                            <label className={styles.label}>Comprobante / Imagen del Certificado (Opcional)</label>
-                            {imagePreview ? (
+                            <label className={styles.label}>
+                                Comprobante del Certificado (Permite PDF o Imágenes)
+                            </label>
+                            {filePreview ? (
                                 <div className={styles.previewContainer}>
-                                    <img src={imagePreview} alt="Comprobante" className={styles.previewImg} />
+                                    {isPdf ? (
+                                        <div className={styles.pdfPreviewBox}>
+                                            <div className={styles.pdfIconCircle}>
+                                                <Icon name="pdf" size={36} color="#ef4444" />
+                                            </div>
+                                            <div className={styles.pdfInfo}>
+                                                <span className={styles.pdfBadge}>Documento PDF</span>
+                                                <span className={styles.pdfFileName}>{formData.fileName || 'certificado.pdf'}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <img src={filePreview} alt="Comprobante" className={styles.previewImg} />
+                                    )}
+
                                     <div className={styles.previewOverlay}>
                                         <Button
                                             type="button"
                                             variant="secondary"
                                             size="sm"
-                                            onClick={handleRemoveImage}
+                                            onClick={handleRemoveFile}
                                             iconLeft={<Icon name="trash" size={14} color="#f43f5e" />}
                                         >
-                                            Eliminar Imagen
+                                            Eliminar Archivo
                                         </Button>
                                     </div>
                                 </div>
                             ) : (
                                 <label className={styles.dropzone}>
-                                    <Icon name="upload" size={28} color="var(--color-primary-light)" />
+                                    <div className={styles.dropIcons}>
+                                        <Icon name="pdf" size={28} color="#ef4444" />
+                                        <Icon name="image" size={28} color="var(--color-primary-light)" />
+                                    </div>
                                     <span className={styles.dropText}>
-                                        Haz clic para subir o arrastra la imagen del certificado (PNG, JPG, WebP - máx 2MB)
+                                        Haz clic para subir o arrastra tu certificado en formato <strong>PDF</strong> o <strong>Imagen (PNG, JPG, WebP)</strong> (máx 3MB)
                                     </span>
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/*,application/pdf,.pdf"
                                         className={styles.fileInput}
                                         onChange={handleFileChange}
                                     />

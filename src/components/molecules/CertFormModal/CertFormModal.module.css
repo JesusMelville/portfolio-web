@@ -195,6 +195,56 @@
     object-fit: contain;
 }
 
+.dropIcons {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pdfPreviewBox {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-surface);
+    width: 100%;
+    min-height: 120px;
+}
+
+.pdfIconCircle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-sm);
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    flex-shrink: 0;
+}
+
+.pdfInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: left;
+}
+
+.pdfBadge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #ef4444;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pdfFileName {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
 .previewOverlay {
     position: absolute;
     bottom: 0.75rem;

@@ -303,66 +303,78 @@ export function DashboardModal() {
                             </div>
 
                             <div className={styles.certsGrid}>
-                                {certifications.map((cert) => (
-                                    <div key={cert.id} className={styles.certRowCard}>
-                                        <div className={styles.certThumbWrap}>
-                                            {cert.certificateImage ? (
-                                                <img
-                                                    src={cert.certificateImage}
-                                                    alt={cert.title}
-                                                    className={styles.certThumb}
-                                                    onClick={() => setViewingCert(cert)}
-                                                />
-                                            ) : (
-                                                <div className={styles.certThumbEmpty}>
-                                                    <Icon name="award" size={24} color="var(--color-primary-light)" />
-                                                </div>
-                                            )}
-                                        </div>
+                                {certifications.map((cert) => {
+                                    const certFile = cert.certificateFile || cert.certificateImage;
+                                    const isPdf = certFile && (certFile.startsWith('data:application/pdf') || cert.fileType === 'pdf');
 
-                                        <div className={styles.certRowInfo}>
-                                            <div className={styles.certRowHeader}>
-                                                <Badge variant="secondary" size="sm">{cert.issuer}</Badge>
-                                                <span className={styles.certDate}>{cert.date}</span>
+                                    return (
+                                        <div key={cert.id} className={styles.certRowCard}>
+                                            <div className={styles.certThumbWrap} onClick={() => certFile && setViewingCert(cert)}>
+                                                {certFile ? (
+                                                    isPdf ? (
+                                                        <div className={styles.certThumbPdf}>
+                                                            <Icon name="pdf" size={22} color="#ef4444" />
+                                                            <span>PDF</span>
+                                                        </div>
+                                                    ) : (
+                                                        <img
+                                                            src={certFile}
+                                                            alt={cert.title}
+                                                            className={styles.certThumb}
+                                                        />
+                                                    )
+                                                ) : (
+                                                    <div className={styles.certThumbEmpty}>
+                                                        <Icon name="award" size={22} color="var(--color-primary-light)" />
+                                                    </div>
+                                                )}
                                             </div>
-                                            <h4 className={styles.certRowTitle}>{cert.title}</h4>
-                                            <span className={styles.certId}>ID: {cert.credentialId || 'N/A'}</span>
-                                        </div>
 
-                                        <div className={styles.certRowActions}>
-                                            {cert.certificateImage && (
+                                            <div className={styles.certRowInfo}>
+                                                <div className={styles.certRowHeader}>
+                                                    <Badge variant="secondary" size="sm">{cert.issuer}</Badge>
+                                                    {isPdf && <Badge variant="warning" size="sm">PDF</Badge>}
+                                                    <span className={styles.certDate}>{cert.date}</span>
+                                                </div>
+                                                <h4 className={styles.certRowTitle}>{cert.title}</h4>
+                                                <span className={styles.certId}>ID: {cert.credentialId || 'N/A'}</span>
+                                            </div>
+
+                                            <div className={styles.certRowActions}>
+                                                {certFile && (
+                                                    <button
+                                                        type="button"
+                                                        className={styles.iconBtn}
+                                                        onClick={() => setViewingCert(cert)}
+                                                        title={isPdf ? 'Abrir PDF' : 'Ver Comprobante'}
+                                                    >
+                                                        <Icon name="eye" size={16} />
+                                                    </button>
+                                                )}
                                                 <button
                                                     type="button"
                                                     className={styles.iconBtn}
-                                                    onClick={() => setViewingCert(cert)}
-                                                    title="Ver Comprobante"
+                                                    onClick={() => handleOpenEditCert(cert)}
+                                                    title="Editar Certificación"
                                                 >
-                                                    <Icon name="eye" size={16} />
+                                                    <Icon name="edit" size={16} />
                                                 </button>
-                                            )}
-                                            <button
-                                                type="button"
-                                                className={styles.iconBtn}
-                                                onClick={() => handleOpenEditCert(cert)}
-                                                title="Editar Certificación"
-                                            >
-                                                <Icon name="edit" size={16} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={`${styles.iconBtn} ${styles.deleteBtn}`}
-                                                onClick={() => {
-                                                    if (window.confirm(`¿Eliminar certificación ${cert.title}?`)) {
-                                                        deleteCertification(cert.id);
-                                                    }
-                                                }}
-                                                title="Eliminar Certificación"
-                                            >
-                                                <Icon name="trash" size={16} />
-                                            </button>
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.iconBtn} ${styles.deleteBtn}`}
+                                                    onClick={() => {
+                                                        if (window.confirm(`¿Eliminar certificación ${cert.title}?`)) {
+                                                            deleteCertification(cert.id);
+                                                        }
+                                                    }}
+                                                    title="Eliminar Certificación"
+                                                >
+                                                    <Icon name="trash" size={16} />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

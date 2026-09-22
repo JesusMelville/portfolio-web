@@ -3,18 +3,14 @@ import { Badge, Button, Icon } from '../../atoms';
 import styles from './CertCard.module.css';
 
 export function CertCard({ cert, onViewCert }) {
-    const handleActionClick = (e) => {
-        if (cert.certificateImage && onViewCert) {
-            e.preventDefault();
-            onViewCert(cert);
-        }
-    };
+    const certFile = cert.certificateFile || cert.certificateImage;
+    const isPdf = certFile && (certFile.startsWith('data:application/pdf') || cert.fileType === 'pdf');
 
     return (
         <article className={styles.certCard} style={{ '--badge-color': cert.badgeColor || 'var(--color-primary)' }}>
             <div className={styles.header}>
                 <div className={styles.iconBadge}>
-                    <Icon name="award" size={24} color={cert.badgeColor || 'var(--color-primary)'} />
+                    <Icon name={isPdf ? 'pdf' : 'award'} size={24} color={isPdf ? '#ef4444' : (cert.badgeColor || 'var(--color-primary)')} />
                 </div>
                 <div className={styles.meta}>
                     <span className={styles.issuer}>{cert.issuer}</span>
@@ -22,12 +18,19 @@ export function CertCard({ cert, onViewCert }) {
                 </div>
             </div>
 
-            {cert.certificateImage && (
+            {certFile && (
                 <div className={styles.thumbWrapper} onClick={() => onViewCert && onViewCert(cert)}>
-                    <img src={cert.certificateImage} alt={cert.title} className={styles.thumbImg} />
+                    {isPdf ? (
+                        <div className={styles.pdfCardTile}>
+                            <Icon name="pdf" size={32} color="#ef4444" />
+                            <span className={styles.pdfTileText}>Documento PDF Adjunto</span>
+                        </div>
+                    ) : (
+                        <img src={certFile} alt={cert.title} className={styles.thumbImg} />
+                    )}
                     <span className={styles.thumbOverlay}>
                         <Icon name="eye" size={16} />
-                        <span>Ver Comprobante</span>
+                        <span>{isPdf ? 'Abrir PDF' : 'Ver Comprobante'}</span>
                     </span>
                 </div>
             )}
@@ -54,15 +57,15 @@ export function CertCard({ cert, onViewCert }) {
                     <code className={styles.credId}>{cert.credentialId || 'Verificado'}</code>
                 </div>
 
-                {cert.certificateImage ? (
+                {certFile ? (
                     <Button
-                        variant="primary"
+                        variant={isPdf ? 'cyan' : 'primary'}
                         size="sm"
                         onClick={() => onViewCert && onViewCert(cert)}
-                        iconLeft={<Icon name="eye" size={14} />}
+                        iconLeft={<Icon name={isPdf ? 'pdf' : 'eye'} size={14} />}
                         className={styles.verifyBtn}
                     >
-                        Ver Certificado
+                        {isPdf ? 'Ver PDF' : 'Ver Certificado'}
                     </Button>
                 ) : cert.url ? (
                     <Button

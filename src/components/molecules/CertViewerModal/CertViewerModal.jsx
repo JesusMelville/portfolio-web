@@ -21,12 +21,31 @@ export function CertViewerModal({ cert, isOpen, onClose }) {
 
     if (!isOpen || !cert) return null;
 
+    const certFile = cert.certificateFile || cert.certificateImage;
+    const isPdf = certFile && (certFile.startsWith('data:application/pdf') || cert.fileType === 'pdf');
+
+    const handleOpenPdfNewTab = () => {
+        if (certFile) {
+            const win = window.open();
+            if (win) {
+                win.document.write(`<iframe src="${certFile}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+            }
+        }
+    };
+
     return (
         <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true">
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={`${styles.modal} ${isPdf ? styles.pdfModal : ''}`} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
                     <div className={styles.info}>
-                        <Badge variant="primary" size="sm">{cert.issuer}</Badge>
+                        <div className={styles.badgesWrap}>
+                            <Badge variant="primary" size="sm">{cert.issuer}</Badge>
+                            {isPdf && (
+                                <Badge variant="warning" size="sm" icon={<Icon name="pdf" size={14} color="#ef4444" />}>
+                                    Documento PDF
+                                </Badge>
+                            )}
+                        </div>
                         <h3 className={styles.title}>{cert.title}</h3>
                         <span className={styles.date}>Emitido en {cert.date} • ID: {cert.credentialId || 'N/A'}</span>
                     </div>
@@ -36,10 +55,20 @@ export function CertViewerModal({ cert, isOpen, onClose }) {
                 </div>
 
                 <div className={styles.body}>
-                    {cert.certificateImage ? (
-                        <div className={styles.imageContainer}>
-                            <img src={cert.certificateImage} alt={cert.title} className={styles.certImage} />
-                        </div>
+                    {certFile ? (
+                        isPdf ? (
+                            <div className={styles.pdfContainer}>
+                                <iframe
+                                    src={certFile}
+                                    title={cert.title}
+                                    className={styles.pdfIframe}
+                                />
+                            </div>
+                        ) : (
+                            <div className={styles.imageContainer}>
+                                <img src={certFile} alt={cert.title} className={styles.certImage} />
+                            </div>
+                        )
                     ) : (
                         <div className={styles.noImagePlaceholder}>
                             <Icon name="award" size={48} color="var(--color-primary-light)" />
@@ -61,17 +90,30 @@ export function CertViewerModal({ cert, isOpen, onClose }) {
                 </div>
 
                 <div className={styles.footer}>
-                    {cert.url && (
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            href={cert.url}
-                            target="_blank"
-                            iconRight={<Icon name="external-link" size={14} />}
-                        >
-                            Verificar enlace oficial
-                        </Button>
-                    )}
+                    <div className={styles.footerLeftActions}>
+                        {isPdf && (
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={handleOpenPdfNewTab}
+                                iconLeft={<Icon name="external-link" size={14} />}
+                            >
+                                Abrir PDF en Pantalla Completa
+                            </Button>
+                        )}
+                        {cert.url && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                href={cert.url}
+                                target="_blank"
+                                iconRight={<Icon name="external-link" size={14} />}
+                            >
+                                Verificar enlace oficial
+                            </Button>
+                        )}
+                    </div>
+
                     <Button variant="ghost" size="sm" onClick={onClose}>
                         Cerrar Visor
                     </Button>
