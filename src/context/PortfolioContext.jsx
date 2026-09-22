@@ -8,6 +8,15 @@ import { fetchGitHubRepos } from '../services/github';
 
 const PortfolioContext = createContext(null);
 
+export const NAV_VIEWS = [
+    { id: 'inicio', label: 'Inicio', number: '01' },
+    { id: 'sobre-mi', label: 'Sobre Mí', number: '02' },
+    { id: 'proyectos', label: 'Proyectos', number: '03' },
+    { id: 'certificaciones', label: 'Certificaciones', number: '04' },
+    { id: 'habilidades', label: 'Habilidades', number: '05' },
+    { id: 'contacto', label: 'Contacto', number: '06' }
+];
+
 const STORAGE_KEYS = {
     PROJECTS: 'portfolio_custom_projects',
     CERTS: 'portfolio_custom_certifications',
@@ -16,6 +25,52 @@ const STORAGE_KEYS = {
 };
 
 export function PortfolioProvider({ children }) {
+    // SPA View Navigation State
+    const [currentView, setCurrentView] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const hash = window.location.hash.replace('#', '');
+            if (NAV_VIEWS.some(v => v.id === hash)) return hash;
+        }
+        return 'inicio';
+    });
+
+    const navigateTo = (viewId) => {
+        if (NAV_VIEWS.some(v => v.id === viewId)) {
+            setCurrentView(viewId);
+            if (typeof window !== 'undefined') {
+                window.history.pushState(null, '', `#${viewId}`);
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
+        }
+    };
+
+    const nextView = () => {
+        const currentIndex = NAV_VIEWS.findIndex(v => v.id === currentView);
+        const nextIndex = (currentIndex + 1) % NAV_VIEWS.length;
+        navigateTo(NAV_VIEWS[nextIndex].id);
+    };
+
+    const prevView = () => {
+        const currentIndex = NAV_VIEWS.findIndex(v => v.id === currentView);
+        const prevIndex = (currentIndex - 1 + NAV_VIEWS.length) % NAV_VIEWS.length;
+        navigateTo(NAV_VIEWS[prevIndex].id);
+    };
+
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.replace('#', '');
+            if (NAV_VIEWS.some(v => v.id === hash)) {
+                setCurrentView(hash);
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        window.addEventListener('popstate', handleHashChange);
+        return () => {
+            window.removeEventListener('hashchange', handleHashChange);
+            window.removeEventListener('popstate', handleHashChange);
+        };
+    }, []);
     // 1. Projects state with localStorage persistence
     const [projects, setProjects] = useState(() => {
         try {
@@ -332,6 +387,11 @@ export function PortfolioProvider({ children }) {
     const visibleProjects = projects.filter(p => p.visible !== false);
 
     const value = {
+        currentView,
+        navigateTo,
+        nextView,
+        prevView,
+        navViews: NAV_VIEWS,
         projects,
         visibleProjects,
         certifications,

@@ -1,5 +1,5 @@
-import React from 'react';
-import { ProgressBar } from '@components/atoms';
+import React, { useEffect } from 'react';
+import { ProgressBar, Icon } from '@components/atoms';
 import { DashboardModal } from '@components/molecules';
 import {
     Navbar,
@@ -12,10 +12,32 @@ import {
     Footer
 } from '@components/organisms';
 import { useTheme } from '@hooks';
+import { usePortfolio } from '@context';
 import styles from './PortfolioTemplate.module.css';
 
 export function PortfolioTemplate() {
     const { theme, toggleTheme } = useTheme();
+    const { currentView, navigateTo, nextView, prevView, navViews } = usePortfolio();
+
+    const currentIndex = navViews.findIndex(v => v.id === currentView);
+    const isFirst = currentIndex === 0;
+    const isLast = currentIndex === navViews.length - 1;
+
+    // Enable ArrowLeft / ArrowRight keyboard navigation between views
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Ignore if in input or modal
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+            if (e.key === 'ArrowRight') {
+                nextView();
+            } else if (e.key === 'ArrowLeft') {
+                prevView();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [nextView, prevView]);
 
     return (
         <div className={styles.templateWrap}>
@@ -32,15 +54,66 @@ export function PortfolioTemplate() {
             {/* Sticky Navigation Header */}
             <Navbar theme={theme} toggleTheme={toggleTheme} />
 
-            {/* Main Content Sections */}
+            {/* Active Full-Screen View Container */}
             <main className={styles.main}>
-                <Hero />
-                <About />
-                <ProjectsSection />
-                <CertsSection />
-                <SkillsSection />
-                <ContactSection />
+                <div key={currentView} className={styles.viewContentWrapper}>
+                    {currentView === 'inicio' && <Hero />}
+                    {currentView === 'sobre-mi' && <About />}
+                    {currentView === 'proyectos' && <ProjectsSection />}
+                    {currentView === 'certificaciones' && <CertsSection />}
+                    {currentView === 'habilidades' && <SkillsSection />}
+                    {currentView === 'contacto' && <ContactSection />}
+                </div>
             </main>
+
+            {/* Floating Bottom View Navigation Switcher */}
+            <nav className={styles.bottomNav} aria-label="Navegación entre apartados">
+                <div className={styles.bottomNavContainer}>
+                    <button
+                        type="button"
+                        className={`${styles.navArrowBtn} ${isFirst ? styles.btnDisabled : ''}`}
+                        onClick={prevView}
+                        disabled={isFirst}
+                        title={!isFirst ? `Ir a ${navViews[currentIndex - 1]?.label}` : undefined}
+                        aria-label="Apartado anterior"
+                    >
+                        <Icon name="chevron-right" size={18} style={{ transform: 'rotate(180deg)' }} />
+                        <span className={styles.arrowBtnText}>Anterior</span>
+                    </button>
+
+                    <div className={styles.pillsList}>
+                        {navViews.map((item, idx) => {
+                            const isActive = item.id === currentView;
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    className={`${styles.navPill} ${isActive ? styles.activePill : ''}`}
+                                    onClick={() => navigateTo(item.id)}
+                                    title={item.label}
+                                    aria-label={`Ver sección ${item.label}`}
+                                    aria-current={isActive ? 'page' : undefined}
+                                >
+                                    <span className={styles.pillNumber}>{item.number}</span>
+                                    <span className={styles.pillLabel}>{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <button
+                        type="button"
+                        className={`${styles.navArrowBtn} ${isLast ? styles.btnDisabled : ''}`}
+                        onClick={nextView}
+                        disabled={isLast}
+                        title={!isLast ? `Ir a ${navViews[currentIndex + 1]?.label}` : undefined}
+                        aria-label="Siguiente apartado"
+                    >
+                        <span className={styles.arrowBtnText}>Siguiente</span>
+                        <Icon name="chevron-right" size={18} />
+                    </button>
+                </div>
+            </nav>
 
             {/* Footer */}
             <Footer />

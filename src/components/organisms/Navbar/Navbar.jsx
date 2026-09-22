@@ -1,68 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, ThemeToggle, Icon } from '../../atoms';
-import { useScrollSpy } from '../../../hooks';
 import { usePortfolio } from '../../../context';
 import styles from './Navbar.module.css';
 
 export function Navbar({ theme, toggleTheme }) {
-    const { openDashboard } = usePortfolio();
-    const [scrolled, setScrolled] = useState(false);
+    const { openDashboard, currentView, navigateTo, navViews } = usePortfolio();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-    const navItems = [
-        { id: 'inicio', label: 'Inicio' },
-        { id: 'sobre-mi', label: 'Sobre Mí' },
-        { id: 'proyectos', label: 'Proyectos' },
-        { id: 'certificaciones', label: 'Certificaciones' },
-        { id: 'habilidades', label: 'Habilidades' },
-        { id: 'contacto', label: 'Contacto' }
-    ];
-
-    const activeSection = useScrollSpy(navItems.map(item => item.id), 120);
-
-    useEffect(() => {
-        let ticking = false;
-
-        const handleScroll = () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const isScrolled = window.scrollY > 30;
-                    setScrolled(prev => prev === isScrolled ? prev : isScrolled);
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        handleScroll();
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     const closeMenu = () => setMobileMenuOpen(false);
 
+    const handleNavClick = (viewId) => {
+        navigateTo(viewId);
+        closeMenu();
+    };
+
     return (
-        <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
+        <header className={`${styles.header} ${styles.scrolled}`}>
             <div className={`container ${styles.navbarContainer}`}>
-                <a href="#inicio" className={styles.logo} onClick={closeMenu}>
+                <a
+                    href="#inicio"
+                    className={styles.logo}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleNavClick('inicio');
+                    }}
+                >
                     <span className={styles.logoIcon}>JM</span>
                     <span className={styles.logoText}>Jesus<span className={styles.logoAccent}>Melville</span></span>
                 </a>
 
-                {/* Desktop Nav */}
+                {/* Desktop Nav Tabs */}
                 <nav className={styles.desktopNav} aria-label="Navegación principal">
                     <ul className={styles.navList}>
-                        {navItems.map((item) => {
-                            const isActive = activeSection === item.id;
+                        {navViews.map((item) => {
+                            const isActive = currentView === item.id;
                             return (
                                 <li key={item.id}>
-                                    <a
-                                        href={`#${item.id}`}
+                                    <button
+                                        type="button"
                                         className={`${styles.navLink} ${isActive ? styles.active : ''}`}
+                                        onClick={() => handleNavClick(item.id)}
+                                        aria-current={isActive ? 'page' : undefined}
                                     >
-                                        {item.label}
+                                        <span className={styles.navNumber}>{item.number}</span>
+                                        <span>{item.label}</span>
                                         {isActive && <span className={styles.activeDot} />}
-                                    </a>
+                                    </button>
                                 </li>
                             );
                         })}
@@ -86,7 +69,7 @@ export function Navbar({ theme, toggleTheme }) {
                     <Button
                         variant="primary"
                         size="sm"
-                        href="#contacto"
+                        onClick={() => handleNavClick('contacto')}
                         className={styles.ctaButton}
                     >
                         Hablemos
@@ -107,18 +90,21 @@ export function Navbar({ theme, toggleTheme }) {
             <div className={`${styles.mobileDrawer} ${mobileMenuOpen ? styles.mobileDrawerOpen : ''}`}>
                 <nav className={styles.mobileNav}>
                     <ul className={styles.mobileNavList}>
-                        {navItems.map((item) => {
-                            const isActive = activeSection === item.id;
+                        {navViews.map((item) => {
+                            const isActive = currentView === item.id;
                             return (
                                 <li key={item.id}>
-                                    <a
-                                        href={`#${item.id}`}
+                                    <button
+                                        type="button"
                                         className={`${styles.mobileNavLink} ${isActive ? styles.mobileActive : ''}`}
-                                        onClick={closeMenu}
+                                        onClick={() => handleNavClick(item.id)}
                                     >
-                                        <span>{item.label}</span>
+                                        <span className={styles.mobileItemLabel}>
+                                            <span className={styles.navNumber}>{item.number}.</span>
+                                            <span>{item.label}</span>
+                                        </span>
                                         <Icon name="chevron-right" size={18} />
-                                    </a>
+                                    </button>
                                 </li>
                             );
                         })}
@@ -140,8 +126,7 @@ export function Navbar({ theme, toggleTheme }) {
                         <Button
                             variant="primary"
                             size="md"
-                            href="#contacto"
-                            onClick={closeMenu}
+                            onClick={() => handleNavClick('contacto')}
                             className={styles.mobileCta}
                         >
                             Contáctame por Gmail

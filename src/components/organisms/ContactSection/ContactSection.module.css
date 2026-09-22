@@ -1,12 +1,16 @@
 .contactSection {
-    padding: 6rem 0 8rem;
+    padding: 3.5rem 0 5rem;
     position: relative;
+    min-height: calc(100vh - 75px);
+    display: flex;
+    align-items: center;
 }
 
 .sectionContainer {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 3.5rem;
+    gap: 2.5rem;
 }
 
 .sectionHeader {

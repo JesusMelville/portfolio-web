@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Badge, Icon } from '../../atoms';
 import { profile } from '../../../data';
+import { usePortfolio } from '../../../context';
 import styles from './Hero.module.css';
 
 export function Hero() {
+    const { navigateTo } = usePortfolio();
     const [roleIndex, setRoleIndex] = useState(0);
 
     useEffect(() => {
@@ -39,7 +41,7 @@ export function Hero() {
                         <Button
                             variant="primary"
                             size="lg"
-                            href="#proyectos"
+                            onClick={() => navigateTo('proyectos')}
                             iconRight={<Icon name="chevron-right" size={18} />}
                         >
                             Ver Proyectos
@@ -48,7 +50,7 @@ export function Hero() {
                         <Button
                             variant="secondary"
                             size="lg"
-                            href="#contacto"
+                            onClick={() => navigateTo('contacto')}
                             iconLeft={<Icon name="gmail" size={18} color="#ea4335" />}
                         >
                             Contáctame
