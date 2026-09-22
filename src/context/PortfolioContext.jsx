@@ -5,6 +5,15 @@ import {
     profile as initialProfile
 } from '../data';
 import { fetchGitHubRepos } from '../services/github';
+import {
+    subscribeToCertifications,
+    subscribeToProjects,
+    saveCertificationToCloud,
+    deleteCertificationFromCloud,
+    saveProjectToCloud,
+    deleteProjectFromCloud,
+    seedInitialCloudData
+} from '../services/firebase';
 
 const PortfolioContext = createContext(null);
 
@@ -130,7 +139,7 @@ export function PortfolioProvider({ children }) {
         };
     }, []);
 
-    // 1. Projects state with localStorage persistence
+    // 1. Projects state
     const [projects, setProjects] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
@@ -139,9 +148,7 @@ export function PortfolioProvider({ children }) {
                 if (Array.isArray(parsed)) {
                     return parsed.map(p => ({
                         ...p,
-                        tags: Array.isArray(p.tags)
-                            ? p.tags
-                            : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
+                        tags: Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
                         metrics: Array.isArray(p.metrics) ? p.metrics : []
                     }));
                 }
@@ -152,7 +159,7 @@ export function PortfolioProvider({ children }) {
         return initialProjects;
     });
 
-    // 2. Certifications state with localStorage persistence
+    // 2. Certifications state
     const [certifications, setCertifications] = useState(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEYS.CERTS);
@@ -161,9 +168,7 @@ export function PortfolioProvider({ children }) {
                 if (Array.isArray(parsed)) {
                     return parsed.map(c => ({
                         ...c,
-                        skills: Array.isArray(c.skills)
-                            ? c.skills
-                            : (typeof c.skills === 'string' ? c.skills.split(',').map(s => s.trim()).filter(Boolean) : [])
+                        skills: Array.isArray(c.skills) ? c.skills : (typeof c.skills === 'string' ? c.skills.split(',').map(s => s.trim()).filter(Boolean) : [])
                     }));
                 }
             }
@@ -190,8 +195,52 @@ export function PortfolioProvider({ children }) {
         return localStorage.getItem(STORAGE_KEYS.LAST_SYNC) || null;
     });
     const [syncError, setSyncError] = useState(null);
+    const [isCloudConnected, setIsCloudConnected] = useState(false);
 
-    // Save to localStorage when state changes
+    // --- REALTIME FIREBASE SUBSCRIPTION ---
+    useEffect(() => {
+        // 1. Seed initial data if cloud database is fresh and empty
+        seedInitialCloudData(projects, certifications);
+
+        // 2. Subscribe to Certifications Real-time
+        const unsubscribeCerts = subscribeToCertifications(
+            (cloudCerts) => {
+                if (cloudCerts && cloudCerts.length > 0) {
+                    setCertifications(cloudCerts);
+                    setIsCloudConnected(true);
+                    try {
+                        localStorage.setItem(STORAGE_KEYS.CERTS, JSON.stringify(cloudCerts));
+                    } catch (e) {
+                        console.warn('LocalStorage save note:', e);
+                    }
+                }
+            },
+            (err) => console.warn('Certifications cloud stream notice:', err)
+        );
+
+        // 3. Subscribe to Projects Real-time
+        const unsubscribeProjects = subscribeToProjects(
+            (cloudProjects) => {
+                if (cloudProjects && cloudProjects.length > 0) {
+                    setProjects(cloudProjects);
+                    setIsCloudConnected(true);
+                    try {
+                        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(cloudProjects));
+                    } catch (e) {
+                        console.warn('LocalStorage save note:', e);
+                    }
+                }
+            },
+            (err) => console.warn('Projects cloud stream notice:', err)
+        );
+
+        return () => {
+            if (unsubscribeCerts) unsubscribeCerts();
+            if (unsubscribeProjects) unsubscribeProjects();
+        };
+    }, []);
+
+    // Save to localStorage when state changes as fallback cache
     useEffect(() => {
         try {
             localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
@@ -223,7 +272,7 @@ export function PortfolioProvider({ children }) {
         }
     }, []);
 
-    // Sync with GitHub API
+    // Sync with GitHub API & save to Firebase
     const syncWithGitHub = async (showErrorToast = true) => {
         setIsSyncing(true);
         setSyncError(null);
@@ -231,29 +280,33 @@ export function PortfolioProvider({ children }) {
         try {
             const githubRepos = await fetchGitHubRepos();
 
-            setProjects(prevProjects => {
-                const existingMap = new Map(prevProjects.map(p => [p.id.toLowerCase(), p]));
+            const existingMap = new Map(projects.map(p => [p.id.toLowerCase(), p]));
 
-                const merged = githubRepos.map(repo => {
-                    const existing = existingMap.get(repo.id.toLowerCase()) || existingMap.get(repo.name.toLowerCase());
-                    if (existing) {
-                        return {
-                            ...repo,
-                            category: existing.category || repo.category,
-                            featured: existing.featured !== undefined ? existing.featured : repo.featured,
-                            visible: existing.visible !== undefined ? existing.visible : true,
-                            customDescription: existing.customDescription || repo.description,
-                            tags: existing.tags && existing.tags.length > 0 ? existing.tags : repo.tags,
-                            metrics: existing.metrics && existing.metrics.length > 0 ? existing.metrics : (repo.metrics || [])
-                        };
-                    }
-                    return repo;
-                });
-
-                const customOnly = prevProjects.filter(p => !p.isFromGitHub && !githubRepos.some(r => r.id.toLowerCase() === p.id.toLowerCase()));
-
-                return [...merged, ...customOnly];
+            const merged = githubRepos.map(repo => {
+                const existing = existingMap.get(repo.id.toLowerCase()) || existingMap.get(repo.name.toLowerCase());
+                if (existing) {
+                    return {
+                        ...repo,
+                        category: existing.category || repo.category,
+                        featured: existing.featured !== undefined ? existing.featured : repo.featured,
+                        visible: existing.visible !== undefined ? existing.visible : true,
+                        customDescription: existing.customDescription || repo.description,
+                        tags: existing.tags && existing.tags.length > 0 ? existing.tags : repo.tags,
+                        metrics: existing.metrics && existing.metrics.length > 0 ? existing.metrics : (repo.metrics || [])
+                    };
+                }
+                return repo;
             });
+
+            const customOnly = projects.filter(p => !p.isFromGitHub && !githubRepos.some(r => r.id.toLowerCase() === p.id.toLowerCase()));
+            const allProjects = [...merged, ...customOnly];
+
+            setProjects(allProjects);
+
+            // Save synced projects to Firebase Cloud
+            for (const proj of allProjects) {
+                saveProjectToCloud(proj).catch(e => console.warn('Cloud sync proj note:', e));
+            }
 
             const now = new Date().toISOString();
             setLastSyncDate(now);
@@ -268,8 +321,8 @@ export function PortfolioProvider({ children }) {
         }
     };
 
-    // --- Certification CRUD ---
-    const addCertification = (newCert) => {
+    // --- Certification CRUD (Direct Firebase Cloud Persistence) ---
+    const addCertification = async (newCert) => {
         const skills = Array.isArray(newCert.skills)
             ? newCert.skills
             : (typeof newCert.skills === 'string' ? newCert.skills.split(',').map(s => s.trim()).filter(Boolean) : []);
@@ -291,30 +344,50 @@ export function PortfolioProvider({ children }) {
             id: newCert.id || `cert-${Date.now()}`,
             skills
         };
+
+        // Optimistic local update
         setCertifications(prev => [certWithId, ...prev]);
+
+        // Save to Firebase Cloud
+        try {
+            await saveCertificationToCloud(certWithId);
+        } catch (err) {
+            console.error('Error saving certification to Firebase:', err);
+        }
+
         return certWithId;
     };
 
-    const updateCertification = (id, updatedData) => {
-        setCertifications(prev => prev.map(cert => {
-            if (cert.id === id) {
-                const skills = updatedData.skills !== undefined
-                    ? (Array.isArray(updatedData.skills)
-                        ? updatedData.skills
-                        : (typeof updatedData.skills === 'string' ? updatedData.skills.split(',').map(s => s.trim()).filter(Boolean) : []))
-                    : cert.skills;
-                return { ...cert, ...updatedData, skills };
-            }
-            return cert;
-        }));
+    const updateCertification = async (id, updatedData) => {
+        const existing = certifications.find(c => c.id === id) || {};
+        const skills = updatedData.skills !== undefined
+            ? (Array.isArray(updatedData.skills)
+                ? updatedData.skills
+                : (typeof updatedData.skills === 'string' ? updatedData.skills.split(',').map(s => s.trim()).filter(Boolean) : []))
+            : existing.skills;
+
+        const merged = { ...existing, ...updatedData, skills };
+
+        setCertifications(prev => prev.map(cert => (cert.id === id ? merged : cert)));
+
+        try {
+            await saveCertificationToCloud(merged);
+        } catch (err) {
+            console.error('Error updating certification in Firebase:', err);
+        }
     };
 
-    const deleteCertification = (id) => {
+    const deleteCertification = async (id) => {
         setCertifications(prev => prev.filter(cert => cert.id !== id));
+        try {
+            await deleteCertificationFromCloud(id);
+        } catch (err) {
+            console.error('Error deleting certification in Firebase:', err);
+        }
     };
 
-    // --- Project CRUD & Controls ---
-    const addProject = (newProject) => {
+    // --- Project CRUD & Controls (Direct Firebase Cloud Persistence) ---
+    const addProject = async (newProject) => {
         const tags = Array.isArray(newProject.tags)
             ? newProject.tags
             : (typeof newProject.tags === 'string' ? newProject.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
@@ -340,49 +413,72 @@ export function PortfolioProvider({ children }) {
             tags,
             metrics
         };
+
         setProjects(prev => [projectWithId, ...prev]);
+
+        try {
+            await saveProjectToCloud(projectWithId);
+        } catch (err) {
+            console.error('Error saving project to Firebase:', err);
+        }
+
         return projectWithId;
     };
 
-    const updateProject = (id, updatedData) => {
-        setProjects(prev => prev.map(p => {
-            if (p.id === id || p.name === id) {
-                const tags = updatedData.tags !== undefined
-                    ? (Array.isArray(updatedData.tags)
-                        ? updatedData.tags
-                        : (typeof updatedData.tags === 'string' ? updatedData.tags.split(',').map(t => t.trim()).filter(Boolean) : []))
-                    : p.tags;
+    const updateProject = async (id, updatedData) => {
+        const existing = projects.find(p => p.id === id || p.name === id) || {};
+        const tags = updatedData.tags !== undefined
+            ? (Array.isArray(updatedData.tags)
+                ? updatedData.tags
+                : (typeof updatedData.tags === 'string' ? updatedData.tags.split(',').map(t => t.trim()).filter(Boolean) : []))
+            : existing.tags;
 
-                const metrics = updatedData.metrics !== undefined
-                    ? (Array.isArray(updatedData.metrics) ? updatedData.metrics : [])
-                    : (p.metrics || []);
+        const metrics = updatedData.metrics !== undefined
+            ? (Array.isArray(updatedData.metrics) ? updatedData.metrics : [])
+            : (existing.metrics || []);
 
-                return { ...p, ...updatedData, tags, metrics };
-            }
-            return p;
-        }));
+        const merged = { ...existing, ...updatedData, tags, metrics };
+
+        setProjects(prev => prev.map(p => (p.id === id || p.name === id ? merged : p)));
+
+        try {
+            await saveProjectToCloud(merged);
+        } catch (err) {
+            console.error('Error updating project in Firebase:', err);
+        }
     };
 
-    const deleteProject = (id) => {
+    const deleteProject = async (id) => {
         setProjects(prev => prev.filter(p => p.id !== id && p.name !== id));
+        try {
+            await deleteProjectFromCloud(id);
+        } catch (err) {
+            console.error('Error deleting project in Firebase:', err);
+        }
     };
 
-    const toggleProjectVisibility = (id) => {
-        setProjects(prev => prev.map(p => {
-            if (p.id === id || p.name === id) {
-                return { ...p, visible: p.visible === undefined ? false : !p.visible };
-            }
-            return p;
-        }));
+    const toggleProjectVisibility = async (id) => {
+        const proj = projects.find(p => p.id === id || p.name === id);
+        if (!proj) return;
+        const updated = { ...proj, visible: proj.visible === undefined ? false : !proj.visible };
+        setProjects(prev => prev.map(p => (p.id === id || p.name === id ? updated : p)));
+        try {
+            await saveProjectToCloud(updated);
+        } catch (err) {
+            console.error('Error toggling project visibility:', err);
+        }
     };
 
-    const toggleProjectFeatured = (id) => {
-        setProjects(prev => prev.map(p => {
-            if (p.id === id || p.name === id) {
-                return { ...p, featured: !p.featured };
-            }
-            return p;
-        }));
+    const toggleProjectFeatured = async (id) => {
+        const proj = projects.find(p => p.id === id || p.name === id);
+        if (!proj) return;
+        const updated = { ...proj, featured: !proj.featured };
+        setProjects(prev => prev.map(p => (p.id === id || p.name === id ? updated : p)));
+        try {
+            await saveProjectToCloud(updated);
+        } catch (err) {
+            console.error('Error toggling project featured:', err);
+        }
     };
 
     // --- Backup & Export Helpers ---
@@ -472,7 +568,8 @@ export function PortfolioProvider({ children }) {
         toggleProjectFeatured,
         exportDataAsJSON,
         exportDataAsJS,
-        resetToDefaults
+        resetToDefaults,
+        isCloudConnected
     };
 
     return (
