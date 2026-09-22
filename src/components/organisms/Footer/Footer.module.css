@@ -96,6 +96,29 @@
     gap: 0.6rem;
 }
 
+.dashFooterBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--color-primary-light);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    width: fit-content;
+    margin-top: 0.4rem;
+}
+
+.dashFooterBtn:hover {
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
 .socialIconBtn {
     display: flex;
     align-items: center;

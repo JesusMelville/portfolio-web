@@ -1,5 +1,6 @@
 import React from 'react';
 import { ProgressBar } from '@components/atoms';
+import { DashboardModal } from '@components/molecules';
 import {
     Navbar,
     Hero,
@@ -43,6 +44,9 @@ export function PortfolioTemplate() {
 
             {/* Footer */}
             <Footer />
+
+            {/* Interactive Admin Dashboard Modal */}
+            <DashboardModal />
         </div>
     );
 }

@@ -1,0 +1,317 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+    projects as initialProjects,
+    certifications as initialCertifications,
+    profile as initialProfile
+} from '../data';
+import { fetchGitHubRepos } from '../services/github';
+
+const PortfolioContext = createContext(null);
+
+const STORAGE_KEYS = {
+    PROJECTS: 'portfolio_custom_projects',
+    CERTS: 'portfolio_custom_certifications',
+    PROFILE: 'portfolio_custom_profile',
+    LAST_SYNC: 'portfolio_github_last_sync'
+};
+
+export function PortfolioProvider({ children }) {
+    // 1. Projects state with localStorage persistence
+    const [projects, setProjects] = useState(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+            if (saved) return JSON.parse(saved);
+        } catch (e) {
+            console.error('Error loading projects from localStorage', e);
+        }
+        return initialProjects;
+    });
+
+    // 2. Certifications state with localStorage persistence
+    const [certifications, setCertifications] = useState(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEYS.CERTS);
+            if (saved) return JSON.parse(saved);
+        } catch (e) {
+            console.error('Error loading certifications from localStorage', e);
+        }
+        return initialCertifications;
+    });
+
+    // 3. Profile state
+    const [profile, setProfile] = useState(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEYS.PROFILE);
+            if (saved) return JSON.parse(saved);
+        } catch (e) {
+            console.error('Error loading profile from localStorage', e);
+        }
+        return initialProfile;
+    });
+
+    const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [lastSyncDate, setLastSyncDate] = useState(() => {
+        return localStorage.getItem(STORAGE_KEYS.LAST_SYNC) || null;
+    });
+    const [syncError, setSyncError] = useState(null);
+
+    // Save to localStorage when state changes
+    useEffect(() => {
+        try {
+            localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+        } catch (e) {
+            console.error('Error saving projects to localStorage', e);
+        }
+    }, [projects]);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(STORAGE_KEYS.CERTS, JSON.stringify(certifications));
+        } catch (e) {
+            console.error('Error saving certifications to localStorage', e);
+        }
+    }, [certifications]);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+        } catch (e) {
+            console.error('Error saving profile to localStorage', e);
+        }
+    }, [profile]);
+
+    // Auto-sync with GitHub on first mount if never synced
+    useEffect(() => {
+        if (!lastSyncDate) {
+            syncWithGitHub(false);
+        }
+    }, []);
+
+    // Sync with GitHub API
+    const syncWithGitHub = async (showErrorToast = true) => {
+        setIsSyncing(true);
+        setSyncError(null);
+
+        try {
+            const githubRepos = await fetchGitHubRepos();
+
+            setProjects(prevProjects => {
+                // Map existing project custom overrides (such as custom category or featured status)
+                const existingMap = new Map(prevProjects.map(p => [p.id.toLowerCase(), p]));
+
+                const merged = githubRepos.map(repo => {
+                    const existing = existingMap.get(repo.id.toLowerCase()) || existingMap.get(repo.name.toLowerCase());
+                    if (existing) {
+                        return {
+                            ...repo,
+                            category: existing.category || repo.category,
+                            featured: existing.featured !== undefined ? existing.featured : repo.featured,
+                            visible: existing.visible !== undefined ? existing.visible : true,
+                            customDescription: existing.customDescription || repo.description,
+                            tags: existing.tags && existing.tags.length > 0 ? existing.tags : repo.tags
+                        };
+                    }
+                    return repo;
+                });
+
+                // Add any manually created custom projects that don't come from GitHub
+                const customOnly = prevProjects.filter(p => !p.isFromGitHub && !githubRepos.some(r => r.id.toLowerCase() === p.id.toLowerCase()));
+
+                return [...merged, ...customOnly];
+            });
+
+            const now = new Date().toISOString();
+            setLastSyncDate(now);
+            localStorage.setItem(STORAGE_KEYS.LAST_SYNC, now);
+        } catch (err) {
+            setSyncError(err.message);
+            if (showErrorToast) {
+                console.error('GitHub sync failed:', err);
+            }
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
+    // --- Certification CRUD ---
+    const addCertification = (newCert) => {
+        const certWithId = {
+            id: `cert-${Date.now()}`,
+            date: newCert.date || new Date().getFullYear().toString(),
+            skills: Array.isArray(newCert.skills) ? newCert.skills : (newCert.skills || '').split(',').map(s => s.trim()).filter(Boolean),
+            ...newCert
+        };
+        setCertifications(prev => [certWithId, ...prev]);
+        return certWithId;
+    };
+
+    const updateCertification = (id, updatedData) => {
+        setCertifications(prev => prev.map(cert => {
+            if (cert.id === id) {
+                const skills = Array.isArray(updatedData.skills)
+                    ? updatedData.skills
+                    : (updatedData.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+                return { ...cert, ...updatedData, skills };
+            }
+            return cert;
+        }));
+    };
+
+    const deleteCertification = (id) => {
+        setCertifications(prev => prev.filter(cert => cert.id !== id));
+    };
+
+    // --- Project CRUD & Controls ---
+    const addProject = (newProject) => {
+        const projectWithId = {
+            id: `proj-${Date.now()}`,
+            title: newProject.title || 'Nuevo Proyecto',
+            subtitle: newProject.subtitle || '',
+            description: newProject.description || '',
+            tags: Array.isArray(newProject.tags) ? newProject.tags : (newProject.tags || '').split(',').map(t => t.trim()).filter(Boolean),
+            category: newProject.category || 'frontend',
+            featured: Boolean(newProject.featured),
+            visible: true,
+            github: newProject.github || '',
+            demo: newProject.demo || '',
+            color: newProject.color || '#8b5cf6',
+            isFromGitHub: false,
+            ...newProject
+        };
+        setProjects(prev => [projectWithId, ...prev]);
+        return projectWithId;
+    };
+
+    const updateProject = (id, updatedData) => {
+        setProjects(prev => prev.map(p => {
+            if (p.id === id || p.name === id) {
+                const tags = Array.isArray(updatedData.tags)
+                    ? updatedData.tags
+                    : (updatedData.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+                return { ...p, ...updatedData, tags };
+            }
+            return p;
+        }));
+    };
+
+    const deleteProject = (id) => {
+        setProjects(prev => prev.filter(p => p.id !== id && p.name !== id));
+    };
+
+    const toggleProjectVisibility = (id) => {
+        setProjects(prev => prev.map(p => {
+            if (p.id === id || p.name === id) {
+                return { ...p, visible: p.visible === undefined ? false : !p.visible };
+            }
+            return p;
+        }));
+    };
+
+    const toggleProjectFeatured = (id) => {
+        setProjects(prev => prev.map(p => {
+            if (p.id === id || p.name === id) {
+                return { ...p, featured: !p.featured };
+            }
+            return p;
+        }));
+    };
+
+    // --- Backup & Export Helpers ---
+    const exportDataAsJSON = () => {
+        const data = {
+            profile,
+            projects,
+            certifications,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `portfolio-data-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const exportDataAsJS = () => {
+        const projectsCode = `export const projects = ${JSON.stringify(projects, null, 4)};\n`;
+        const certsCode = `export const certifications = ${JSON.stringify(certifications, null, 4)};\n`;
+
+        // Download projects.js
+        const blobP = new Blob([projectsCode], { type: 'application/javascript' });
+        const urlP = URL.createObjectURL(blobP);
+        const aP = document.createElement('a');
+        aP.href = urlP;
+        aP.download = 'projects.js';
+        aP.click();
+        URL.revokeObjectURL(urlP);
+
+        // Download certifications.js
+        setTimeout(() => {
+            const blobC = new Blob([certsCode], { type: 'application/javascript' });
+            const urlC = URL.createObjectURL(blobC);
+            const aC = document.createElement('a');
+            aC.href = urlC;
+            aC.download = 'certifications.js';
+            aC.click();
+            URL.revokeObjectURL(urlC);
+        }, 400);
+    };
+
+    const resetToDefaults = () => {
+        if (window.confirm('¿Estás seguro de restablecer todos los datos a sus valores iniciales?')) {
+            localStorage.removeItem(STORAGE_KEYS.PROJECTS);
+            localStorage.removeItem(STORAGE_KEYS.CERTS);
+            localStorage.removeItem(STORAGE_KEYS.PROFILE);
+            localStorage.removeItem(STORAGE_KEYS.LAST_SYNC);
+            setProjects(initialProjects);
+            setCertifications(initialCertifications);
+            setProfile(initialProfile);
+            setLastSyncDate(null);
+        }
+    };
+
+    // Filtered visible projects for the public portfolio
+    const visibleProjects = projects.filter(p => p.visible !== false);
+
+    const value = {
+        projects,
+        visibleProjects,
+        certifications,
+        profile,
+        setProfile,
+        isDashboardOpen,
+        openDashboard: () => setIsDashboardOpen(true),
+        closeDashboard: () => setIsDashboardOpen(false),
+        isSyncing,
+        lastSyncDate,
+        syncError,
+        syncWithGitHub,
+        addCertification,
+        updateCertification,
+        deleteCertification,
+        addProject,
+        updateProject,
+        deleteProject,
+        toggleProjectVisibility,
+        toggleProjectFeatured,
+        exportDataAsJSON,
+        exportDataAsJS,
+        resetToDefaults
+    };
+
+    return (
+        <PortfolioContext.Provider value={value}>
+            {children}
+        </PortfolioContext.Provider>
+    );
+}
+
+export function usePortfolio() {
+    const context = useContext(PortfolioContext);
+    if (!context) {
+        throw new Error('usePortfolio must be used within a PortfolioProvider');
+    }
+    return context;
+}

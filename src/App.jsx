@@ -1,7 +1,13 @@
+import React from 'react';
+import { PortfolioProvider } from './context';
 import { PortfolioTemplate } from '@components/templates';
 
 function App() {
-    return <PortfolioTemplate />;
+    return (
+        <PortfolioProvider>
+            <PortfolioTemplate />
+        </PortfolioProvider>
+    );
 }
 
 export default App;

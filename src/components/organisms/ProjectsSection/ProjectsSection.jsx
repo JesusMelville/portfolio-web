@@ -1,30 +1,33 @@
 import React, { useState, useMemo } from 'react';
 import { Badge, Button, Icon } from '../../atoms';
 import { FilterTabs, SearchInput, ProjectCard, ProjectModal } from '../../molecules';
-import { projects, projectCategories } from '../../../data';
+import { projectCategories } from '../../../data';
+import { usePortfolio } from '../../../context';
 import styles from './ProjectsSection.module.css';
 
 export function ProjectsSection() {
+    const { visibleProjects, syncWithGitHub, isSyncing, openDashboard } = usePortfolio();
+
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeModalProject, setActiveModalProject] = useState(null);
 
-    // Calculate category counts
+    // Calculate category counts based on dynamic visible projects
     const categoryCounts = useMemo(() => {
-        const counts = { all: projects.length };
+        const counts = { all: visibleProjects.length };
         projectCategories.forEach(cat => {
             if (cat.id !== 'all') {
-                counts[cat.id] = projects.filter(p => p.category === cat.id).length;
+                counts[cat.id] = visibleProjects.filter(p => p.category === cat.id).length;
             }
         });
         return counts;
-    }, []);
+    }, [visibleProjects]);
 
     // Filter projects
     const filteredProjects = useMemo(() => {
-        return projects.filter((project) => {
+        return visibleProjects.filter((project) => {
             const matchesCategory = selectedCategory === 'all' || project.category === selectedCategory;
-            
+
             const query = searchQuery.toLowerCase().trim();
             if (!query) return matchesCategory;
 
@@ -32,11 +35,11 @@ export function ProjectsSection() {
                 project.title.toLowerCase().includes(query) ||
                 (project.subtitle && project.subtitle.toLowerCase().includes(query)) ||
                 project.description.toLowerCase().includes(query) ||
-                project.tags.some(tag => tag.toLowerCase().includes(query));
+                (project.tags && project.tags.some(tag => tag.toLowerCase().includes(query)));
 
             return matchesCategory && matchesSearch;
         });
-    }, [selectedCategory, searchQuery]);
+    }, [selectedCategory, searchQuery, visibleProjects]);
 
     const handleClearFilters = () => {
         setSelectedCategory('all');
@@ -47,13 +50,40 @@ export function ProjectsSection() {
         <section className={styles.projectsSection} id="proyectos">
             <div className={`container ${styles.sectionContainer}`}>
                 <div className={styles.sectionHeader}>
-                    <Badge variant="primary" size="md">
-                        Portafolio de Trabajos
-                    </Badge>
-                    <h2 className={styles.sectionTitle}>Proyectos Seleccionados</h2>
+                    <div className={styles.badgeRow}>
+                        <Badge variant="primary" size="md">
+                            Portafolio de Trabajos
+                        </Badge>
+                        <Badge variant="success" size="sm" dot>
+                            Sincronizado con GitHub
+                        </Badge>
+                    </div>
+
+                    <h2 className={styles.sectionTitle}>Todos Mis Proyectos</h2>
                     <p className={styles.sectionSubtitle}>
-                        Explora mis proyectos reales, dashboards analíticos, aplicaciones full stack y herramientas de código abierto.
+                        Explora mis repositorios en GitHub, aplicaciones full stack, dashboards interactivos y herramientas de código abierto.
                     </p>
+
+                    <div className={styles.quickActions}>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => syncWithGitHub()}
+                            disabled={isSyncing}
+                            iconLeft={<Icon name="refresh" size={16} className={isSyncing ? styles.spin : ''} />}
+                        >
+                            {isSyncing ? 'Sincronizando...' : 'Sincronizar GitHub'}
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={openDashboard}
+                            iconLeft={<Icon name="settings" size={16} />}
+                        >
+                            Gestionar Proyectos
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Filters and Search Bar */}
@@ -78,7 +108,7 @@ export function ProjectsSection() {
                     <div className={styles.projectsGrid}>
                         {filteredProjects.map((project) => (
                             <ProjectCard
-                                key={project.id}
+                                key={project.id || project.name}
                                 project={project}
                                 onOpenDetails={(proj) => setActiveModalProject(proj)}
                             />

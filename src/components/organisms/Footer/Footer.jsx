@@ -1,9 +1,11 @@
 import React from 'react';
 import { Icon } from '../../atoms';
-import { profile } from '../../../data';
+import { usePortfolio } from '../../../context';
 import styles from './Footer.module.css';
 
 export function Footer() {
+    const { profile, openDashboard } = usePortfolio();
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -35,7 +37,7 @@ export function Footer() {
                     </div>
 
                     <div className={styles.socialCol}>
-                        <span className={styles.linksHeading}>Conectar</span>
+                        <span className={styles.linksHeading}>Conectar & Gestión</span>
                         <div className={styles.socialIcons}>
                             <a
                                 href={profile.github}
@@ -63,6 +65,15 @@ export function Footer() {
                                 <Icon name="gmail" size={20} color="#ea4335" />
                             </a>
                         </div>
+
+                        <button
+                            type="button"
+                            className={styles.dashFooterBtn}
+                            onClick={openDashboard}
+                        >
+                            <Icon name="settings" size={16} />
+                            <span>Panel de Control (Dashboard)</span>
+                        </button>
                     </div>
                 </div>
 

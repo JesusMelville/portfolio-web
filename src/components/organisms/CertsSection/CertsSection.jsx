@@ -1,11 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { Badge, Icon } from '../../atoms';
-import { FilterTabs, CertCard } from '../../molecules';
-import { certifications, certCategories } from '../../../data';
+import { Badge, Button, Icon } from '../../atoms';
+import { FilterTabs, CertCard, CertFormModal, CertViewerModal } from '../../molecules';
+import { certCategories } from '../../../data';
+import { usePortfolio } from '../../../context';
 import styles from './CertsSection.module.css';
 
 export function CertsSection() {
+    const { certifications, addCertification, openDashboard } = usePortfolio();
+
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [viewingCert, setViewingCert] = useState(null);
 
     const categoryCounts = useMemo(() => {
         const counts = { all: certifications.length };
@@ -15,12 +20,12 @@ export function CertsSection() {
             }
         });
         return counts;
-    }, []);
+    }, [certifications]);
 
     const filteredCerts = useMemo(() => {
         if (selectedCategory === 'all') return certifications;
         return certifications.filter(c => c.category === selectedCategory);
-    }, [selectedCategory]);
+    }, [selectedCategory, certifications]);
 
     return (
         <section className={styles.certsSection} id="certificaciones">
@@ -29,10 +34,30 @@ export function CertsSection() {
                     <Badge variant="secondary" size="md">
                         Educación & Credenciales
                     </Badge>
-                    <h2 className={styles.sectionTitle}>Certificaciones Profesionales</h2>
+                    <h2 className={styles.sectionTitle}>Certificaciones Oficiales</h2>
                     <p className={styles.sectionSubtitle}>
-                        Acreditaciones oficiales y especializaciones que avalan mis conocimientos en arquitectura, desarrollo full stack y frontend.
+                        Acreditaciones, especializaciones y credenciales profesionales verificadas en desarrollo web, React, backend y arquitectura.
                     </p>
+
+                    <div className={styles.actionButtons}>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => setIsUploadModalOpen(true)}
+                            iconLeft={<Icon name="upload" size={16} />}
+                        >
+                            + Subir Nueva Certificación
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={openDashboard}
+                            iconLeft={<Icon name="settings" size={16} />}
+                        >
+                            Administrar Certificados
+                        </Button>
+                    </div>
                 </div>
 
                 <div className={styles.controlBar}>
@@ -46,10 +71,28 @@ export function CertsSection() {
 
                 <div className={styles.certsGrid}>
                     {filteredCerts.map((cert) => (
-                        <CertCard key={cert.id} cert={cert} />
+                        <CertCard
+                            key={cert.id}
+                            cert={cert}
+                            onViewCert={(c) => setViewingCert(c)}
+                        />
                     ))}
                 </div>
             </div>
+
+            {/* Upload Modal */}
+            <CertFormModal
+                isOpen={isUploadModalOpen}
+                onClose={() => setIsUploadModalOpen(false)}
+                onSave={(data) => addCertification(data)}
+            />
+
+            {/* Viewer Modal */}
+            <CertViewerModal
+                cert={viewingCert}
+                isOpen={Boolean(viewingCert)}
+                onClose={() => setViewingCert(null)}
+            />
         </section>
     );
 }

@@ -2,7 +2,14 @@ import React from 'react';
 import { Badge, Button, Icon } from '../../atoms';
 import styles from './CertCard.module.css';
 
-export function CertCard({ cert }) {
+export function CertCard({ cert, onViewCert }) {
+    const handleActionClick = (e) => {
+        if (cert.certificateImage && onViewCert) {
+            e.preventDefault();
+            onViewCert(cert);
+        }
+    };
+
     return (
         <article className={styles.certCard} style={{ '--badge-color': cert.badgeColor || 'var(--color-primary)' }}>
             <div className={styles.header}>
@@ -15,6 +22,16 @@ export function CertCard({ cert }) {
                 </div>
             </div>
 
+            {cert.certificateImage && (
+                <div className={styles.thumbWrapper} onClick={() => onViewCert && onViewCert(cert)}>
+                    <img src={cert.certificateImage} alt={cert.title} className={styles.thumbImg} />
+                    <span className={styles.thumbOverlay}>
+                        <Icon name="eye" size={16} />
+                        <span>Ver Comprobante</span>
+                    </span>
+                </div>
+            )}
+
             <div className={styles.body}>
                 <h3 className={styles.title}>{cert.title}</h3>
                 <p className={styles.description}>{cert.description}</p>
@@ -23,7 +40,7 @@ export function CertCard({ cert }) {
             <div className={styles.skillsSection}>
                 <span className={styles.skillsLabel}>Competencias avaladas:</span>
                 <div className={styles.skillsList}>
-                    {cert.skills.map((skill) => (
+                    {cert.skills && cert.skills.map((skill) => (
                         <span key={skill} className={styles.skillTag}>
                             {skill}
                         </span>
@@ -34,10 +51,20 @@ export function CertCard({ cert }) {
             <div className={styles.footer}>
                 <div className={styles.credentialWrap}>
                     <span className={styles.credLabel}>ID de Credencial:</span>
-                    <code className={styles.credId}>{cert.credentialId}</code>
+                    <code className={styles.credId}>{cert.credentialId || 'Verificado'}</code>
                 </div>
 
-                {cert.url && (
+                {cert.certificateImage ? (
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => onViewCert && onViewCert(cert)}
+                        iconLeft={<Icon name="eye" size={14} />}
+                        className={styles.verifyBtn}
+                    >
+                        Ver Certificado
+                    </Button>
+                ) : cert.url ? (
                     <Button
                         variant="secondary"
                         size="sm"
@@ -48,7 +75,7 @@ export function CertCard({ cert }) {
                     >
                         Ver Credencial
                     </Button>
-                )}
+                ) : null}
             </div>
         </article>
     );
