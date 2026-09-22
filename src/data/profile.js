@@ -1,24 +1,24 @@
 export const profile = {
     name: 'Jesus Melville',
     shortName: 'Jesus Melville',
-    role: 'Desarrollador Web Full Stack',
-    subRoles: ['Frontend Specialist', 'React & TypeScript Enthusiast', 'UI/UX Crafting'],
+    role: 'Ingeniero de Sistemas',
+    subRoles: ['Full Stack Developer', 'Frontend Specialist', 'Inteligencia Artificial & Cloud', 'Software Architect'],
     status: {
         available: true,
         text: 'Disponible para trabajar / Nuevos proyectos'
     },
-    bio: 'Ingeniero de software y desarrollador web apasionado por crear aplicaciones modernas, altamente interactivas, accesibles y con arquitecturas limpias y escalables.',
+    bio: 'Ingeniero de Sistemas y desarrollador Full Stack apasionado por diseñar arquitecturas de software limpias, escalables y aplicaciones web modernas de alto impacto.',
     about: {
         paragraphs: [
-            'Soy un desarrollador enfocado en el ecosistema de JavaScript y TypeScript, especializado en construir interfaces fluidas y reactivas con React y arquitecturas modulares como Atomic Design.',
-            'Cuento con experiencia desarrollando desde aplicaciones web completas (Full Stack) y dashboards analíticos complejos, hasta extensiones de navegador y herramientas interactivas de alto rendimiento.',
-            'Mi objetivo siempre es el equilibrio perfecto entre una experiencia de usuario impecable (UI/UX) y un código limpio, estructurado y mantenible.'
+            'Soy Ingeniero de Sistemas enfocado en el desarrollo de software moderno y arquitecturas escalables, especializado en el ecosistema de JavaScript, TypeScript, React y servicios cloud.',
+            'Cuento con experiencia diseñando e implementando aplicaciones web completas (Full Stack), dashboards analíticos complejos, soluciones integradas con Inteligencia Artificial y herramientas de alto rendimiento.',
+            'Mi enfoque de ingeniería combina rigor técnico, estándares de calidad de software (SOLID, Clean Architecture, Atomic Design) y una experiencia de usuario (UI/UX) impecable.'
         ],
         highlights: [
-            { title: 'Arquitectura Limpia', desc: 'Atomic Design, Modularidad y Patrones de Diseño Sólidos' },
-            { title: 'Frontend Moderno', desc: 'React 18+, Vite, TypeScript, CSS Modules & Glassmorphism' },
-            { title: 'Desarrollo Full Stack', desc: 'Node.js, REST APIs, Integración de Servicios Cloud' },
-            { title: 'Rendimiento y UX', desc: 'Optimización de carga, Micro-animaciones y Accesibilidad' }
+            { title: 'Arquitectura Limpia', desc: 'Atomic Design, Modularidad, SOLID y Patrones de Diseño Sólidos' },
+            { title: 'Frontend Moderno', desc: 'React 18+, Next.js, TypeScript, CSS Modules & Glassmorphism' },
+            { title: 'Desarrollo Full Stack', desc: 'Node.js, PostgreSQL/MySQL, REST APIs y Cloud Services' },
+            { title: 'IA & Rendimiento', desc: 'Integración de LLMs, Optimización de carga y Micro-animaciones' }
         ]
     },
     location: 'Perú',
@@ -29,7 +29,7 @@ export const profile = {
     stats: [
         { label: 'Proyectos Reales', value: '10+' },
         { label: 'Certificaciones', value: '6+' },
-        { label: 'Tecnologías Dominadas', value: '15+' },
+        { label: 'Tecnologías Dominadas', value: '25+' },
         { label: 'Commits y Contribuciones', value: '500+' }
     ]
 };

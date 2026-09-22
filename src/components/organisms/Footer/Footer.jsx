@@ -16,7 +16,7 @@ export function Footer() {
                 <div className={styles.brand}>
                     <span className={styles.logoIcon}>JM</span>
                     <span className={styles.copyright}>
-                        &copy; {new Date().getFullYear()} <strong>{profile.name}</strong> • Desarrollador Web Full Stack
+                        &copy; {new Date().getFullYear()} <strong>{profile.name}</strong> • Ingeniero de Sistemas & Full Stack Developer
                     </span>
                 </div>
 
