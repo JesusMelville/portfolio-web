@@ -16,9 +16,9 @@ export const profile = {
         ],
         highlights: [
             { title: 'Arquitectura Limpia', desc: 'Atomic Design, Modularidad, SOLID y Patrones de Diseño Sólidos' },
-            { title: 'Frontend Moderno', desc: 'React 18+, Next.js, TypeScript, CSS Modules & Glassmorphism' },
-            { title: 'Desarrollo Full Stack', desc: 'Node.js, PostgreSQL/MySQL, REST APIs y Cloud Services' },
-            { title: 'IA & Rendimiento', desc: 'Integración de LLMs, Optimización de carga y Micro-animaciones' }
+            { title: 'Frontend Moderno', desc: 'React 18+, Next.js, Angular, TypeScript, Tailwind & Glassmorphism' },
+            { title: 'Backend & Desktop', desc: 'Java, Node.js, NestJS, Python, PostgreSQL/MySQL, Electron y APIs' },
+            { title: 'IA & DevOps', desc: 'Integración de LLMs, Docker, Git/GitLab y Automatización' }
         ]
     },
     location: 'Perú',

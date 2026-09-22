@@ -7,7 +7,8 @@ import styles from './SkillsSection.module.css';
 const skillFilterTabs = [
     { id: 'all', label: 'Todas las Habilidades' },
     { id: 'frontend', label: 'Frontend & UI' },
-    { id: 'backend', label: 'Backend & Cloud' },
+    { id: 'backend', label: 'Backend & APIs' },
+    { id: 'desktop', label: 'Desktop & Extensiones' },
     { id: 'ai', label: 'IA & Automatización' },
     { id: 'tools', label: 'Herramientas & DevOps' }
 ];
