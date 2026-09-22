@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button, Input, Textarea, Icon } from '../../atoms';
-import { useCopyToClipboard } from '../../../hooks';
 import styles from './ContactForm.module.css';
 
 export function ContactForm({ recipientEmail }) {
@@ -10,157 +9,161 @@ export function ContactForm({ recipientEmail }) {
         subject: '',
         message: ''
     });
-    const [status, setStatus] = useState('idle'); // 'idle' | 'sending' | 'success'
-    const [generatedLinks, setGeneratedLinks] = useState({ gmailUrl: '', mailtoUrl: '', fullText: '' });
-    const { copied, copy } = useCopyToClipboard();
+    const [status, setStatus] = useState('idle'); // 'idle' | 'sending' | 'success' | 'error'
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setStatus('sending');
+        setErrorMessage('');
 
-        const subjectText = formData.subject || `Contacto desde Portafolio - ${formData.name}`;
-        const bodyText = `Hola Jesús,\n\nMi nombre es: ${formData.name}\nMi correo de contacto: ${formData.email}\n\nMensaje:\n${formData.message}\n\n---\nEnviado desde tu portafolio web.`;
+        try {
+            const response = await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    Nombre: formData.name,
+                    Email: formData.email,
+                    Asunto: formData.subject || 'Mensaje desde Portafolio Web',
+                    Mensaje: formData.message,
+                    _subject: `Nuevo mensaje de ${formData.name} - Portafolio`,
+                    _template: 'table',
+                    _captcha: 'false'
+                })
+            });
 
-        const encodedSubject = encodeURIComponent(subjectText);
-        const encodedBody = encodeURIComponent(bodyText);
+            const data = await response.json();
 
-        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipientEmail)}&su=${encodedSubject}&body=${encodedBody}`;
-        const mailtoUrl = `mailto:${recipientEmail}?subject=${encodedSubject}&body=${encodedBody}`;
-
-        setGeneratedLinks({
-            gmailUrl,
-            mailtoUrl,
-            fullText: bodyText
-        });
-
-        // Open Gmail Web Composer directly in new tab
-        window.open(gmailUrl, '_blank', 'noopener,noreferrer');
-
-        // Also trigger native mailto as a clean background link (without target=_blank to prevent about:blank)
-        const mailtoLink = document.createElement('a');
-        mailtoLink.href = mailtoUrl;
-        mailtoLink.style.display = 'none';
-        document.body.appendChild(mailtoLink);
-        mailtoLink.click();
-        document.body.removeChild(mailtoLink);
-
-        setStatus('success');
+            if (response.ok && (data.success === 'true' || data.success === true || data.message)) {
+                setStatus('success');
+                setFormData({ name: '', email: '', subject: '', message: '' });
+            } else {
+                throw new Error(data.message || 'No se pudo enviar el mensaje.');
+            }
+        } catch (err) {
+            console.error('Error enviando formulario:', err);
+            // Even if offline/CORS, we provide friendly fallback
+            setStatus('error');
+            setErrorMessage('Hubo un inconveniente al enviar directamente. Puedes abrir tu cliente de correo.');
+        }
     };
 
     const handleReset = () => {
         setStatus('idle');
-        setFormData({ name: '', email: '', subject: '', message: '' });
+        setErrorMessage('');
     };
 
     return (
         <div className={styles.formContainer}>
             <div className={styles.formHeader}>
                 <h3 className={styles.formTitle}>Envíame un mensaje directo</h3>
-                <p className={styles.formSubtitle}>Completa los datos y se abrirá tu correo listo para enviar.</p>
+                <p className={styles.formSubtitle}>Escribe tu consulta y me llegará directamente a mi bandeja de entrada.</p>
             </div>
 
             {status === 'success' && (
                 <div className={styles.successBanner}>
                     <div className={styles.successIcon}>
-                        <Icon name="check" size={20} color="var(--color-accent-emerald)" />
+                        <Icon name="check" size={22} color="var(--color-accent-emerald)" />
                     </div>
                     <div className={styles.successBody}>
-                        <h4 className={styles.successTitle}>¡Mensaje preparado con éxito!</h4>
+                        <h4 className={styles.successTitle}>¡Mensaje enviado con éxito!</h4>
                         <p className={styles.successText}>
-                            Se ha generado tu mensaje para <strong>{recipientEmail}</strong>. Si no se abrió automáticamente, selecciona una opción:
+                            Gracias por contactarme. He recibido tu mensaje en mi correo y te responderé en menos de 24 horas.
                         </p>
-                        <div className={styles.successActions}>
-                            <a
-                                href={generatedLinks.gmailUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.actionLink}
-                            >
-                                <Icon name="gmail" size={16} color="#ea4335" />
-                                <span>Abrir en Gmail Web</span>
-                            </a>
-                            <a
-                                href={generatedLinks.mailtoUrl}
-                                className={styles.actionLink}
-                            >
-                                <Icon name="mail" size={16} />
-                                <span>Abrir App de Correo</span>
-                            </a>
-                            <button
-                                type="button"
-                                className={styles.actionLinkBtn}
-                                onClick={() => copy(generatedLinks.fullText)}
-                            >
-                                <Icon name={copied ? 'check' : 'copy'} size={15} />
-                                <span>{copied ? '¡Copiado!' : 'Copiar Mensaje'}</span>
-                            </button>
-                        </div>
                         <button
                             type="button"
                             className={styles.newMsgBtn}
                             onClick={handleReset}
                         >
-                            + Redactar otro mensaje
+                            + Enviar otro mensaje
                         </button>
                     </div>
                 </div>
             )}
 
-            <form className={styles.form} onSubmit={handleSubmit}>
-                <div className={styles.row}>
-                    <Input
-                        label="Tu Nombre"
-                        id="contact-name"
-                        value={formData.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                        placeholder="Ej. Juan Pérez"
-                        required
-                    />
-                    <Input
-                        label="Tu Correo Electrónico"
-                        id="contact-email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleChange('email', e.target.value)}
-                        placeholder="tu@email.com"
-                        required
-                    />
+            {status === 'error' && (
+                <div className={styles.errorBanner}>
+                    <div className={styles.errorIcon}>
+                        <Icon name="alert-triangle" size={20} color="#fb7185" />
+                    </div>
+                    <div className={styles.errorBody}>
+                        <h4 className={styles.errorTitle}>Aviso de envío</h4>
+                        <p className={styles.errorText}>
+                            {errorMessage}
+                        </p>
+                        <div className={styles.errorActions}>
+                            <a
+                                href={`mailto:${recipientEmail}?subject=${encodeURIComponent(formData.subject || 'Contacto')}&body=${encodeURIComponent(formData.message)}`}
+                                className={styles.fallbackBtn}
+                            >
+                                <Icon name="mail" size={16} />
+                                <span>Enviar con mi aplicación de correo</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+            )}
 
-                <Input
-                    label="Asunto"
-                    id="contact-subject"
-                    value={formData.subject}
-                    onChange={(e) => handleChange('subject', e.target.value)}
-                    placeholder="Ej. Oportunidad laboral / Proyecto Web"
-                    required
-                />
+            {status !== 'success' && (
+                <form className={styles.form} onSubmit={handleSubmit}>
+                    <div className={styles.row}>
+                        <Input
+                            label="Tu Nombre"
+                            id="contact-name"
+                            value={formData.name}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                            placeholder="Ej. Alexander Smith"
+                            required
+                        />
+                        <Input
+                            label="Tu Correo Electrónico"
+                            id="contact-email"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => handleChange('email', e.target.value)}
+                            placeholder="tu@email.com"
+                            required
+                        />
+                    </div>
 
-                <Textarea
-                    label="Mensaje"
-                    id="contact-message"
-                    rows={4}
-                    value={formData.message}
-                    onChange={(e) => handleChange('message', e.target.value)}
-                    placeholder="Cuéntame sobre tu proyecto, propuesta o consulta técnica..."
-                    required
-                />
+                    <Input
+                        label="Asunto"
+                        id="contact-subject"
+                        value={formData.subject}
+                        onChange={(e) => handleChange('subject', e.target.value)}
+                        placeholder="Ej. Oportunidad laboral / Proyecto Web"
+                        required
+                    />
 
-                <Button
-                    type="submit"
-                    variant="primary"
-                    size="lg"
-                    disabled={status === 'sending'}
-                    iconRight={<Icon name="send" size={18} />}
-                    className={styles.submitBtn}
-                >
-                    {status === 'sending' ? 'Preparando correo...' : 'Enviar Mensaje Ahora'}
-                </Button>
-            </form>
+                    <Textarea
+                        label="Mensaje"
+                        id="contact-message"
+                        rows={4}
+                        value={formData.message}
+                        onChange={(e) => handleChange('message', e.target.value)}
+                        placeholder="Cuéntame sobre tu proyecto, objetivos o consulta técnica..."
+                        required
+                    />
+
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        size="lg"
+                        disabled={status === 'sending'}
+                        iconRight={<Icon name="send" size={18} className={status === 'sending' ? styles.spin : ''} />}
+                        className={styles.submitBtn}
+                    >
+                        {status === 'sending' ? 'Enviando mensaje directo...' : 'Enviar Mensaje Directo'}
+                    </Button>
+                </form>
+            )}
         </div>
     );
 }

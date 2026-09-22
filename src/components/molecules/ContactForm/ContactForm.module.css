@@ -54,10 +54,10 @@
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    padding: 1.25rem;
+    padding: 1.5rem;
     border-radius: var(--radius-md);
-    background: rgba(16, 185, 129, 0.08);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.35);
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -65,8 +65,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: rgba(16, 185, 129, 0.2);
     flex-shrink: 0;
@@ -81,30 +81,67 @@
 }
 
 .successTitle {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #34d399;
 }
 
 .successText {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    line-height: 1.45;
+    line-height: 1.5;
 }
 
-.successActions {
+.errorBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.errorIcon {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(244, 63, 94, 0.2);
+    flex-shrink: 0;
 }
 
-.actionLink, .actionLinkBtn {
+.errorBody {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.errorTitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fb7185;
+}
+
+.errorText {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.errorActions {
+    margin-top: 0.25rem;
+}
+
+.fallbackBtn {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.45rem 0.8rem;
+    padding: 0.45rem 0.85rem;
     border-radius: var(--radius-sm);
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
@@ -112,30 +149,39 @@
     font-size: 0.8rem;
     font-weight: 600;
     text-decoration: none;
-    cursor: pointer;
     transition: all var(--transition-fast);
 }
 
-.actionLink:hover, .actionLinkBtn:hover {
+.fallbackBtn:hover {
     border-color: var(--color-primary);
     color: var(--color-primary-light);
-    transform: translateY(-1px);
 }
 
 .newMsgBtn {
     background: transparent;
     border: none;
-    color: var(--text-muted);
-    font-size: 0.775rem;
+    color: var(--color-primary-light);
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
     text-align: left;
-    padding: 0.2rem 0;
-    margin-top: 0.25rem;
-    transition: color var(--transition-fast);
+    padding: 0.3rem 0;
+    margin-top: 0.5rem;
+    transition: all var(--transition-fast);
 }
 
 .newMsgBtn:hover {
-    color: var(--text-primary);
+    text-decoration: underline;
+    color: #ffffff;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 @keyframes fadeIn {
