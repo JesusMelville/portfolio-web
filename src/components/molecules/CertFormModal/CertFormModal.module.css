@@ -195,10 +195,96 @@
     object-fit: contain;
 }
 
-.dropIcons {
+.uploadHeader {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+}
+
+.uploadHeader .label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.uploadHeader .label em {
+    font-style: normal;
+    color: #ec4899;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.magicBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(236, 72, 153, 0.12);
+    border: 1px solid rgba(236, 72, 153, 0.3);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ec4899;
+    margin-bottom: 0.25rem;
+}
+
+.iconsRow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.dropSubtext {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+    max-width: 420px;
+}
+
+.autoFillAlert {
+    display: flex;
+    align-items: flex-start;
     gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(236, 72, 153, 0.08);
+    border: 1px solid rgba(236, 72, 153, 0.25);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.alertIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: rgba(236, 72, 153, 0.15);
+    flex-shrink: 0;
+}
+
+.alertText {
+    font-size: 0.825rem;
+    color: var(--text-primary);
+}
+
+.alertText strong {
+    color: #ec4899;
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.alertText p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.dropIcons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .pdfPreviewBox {

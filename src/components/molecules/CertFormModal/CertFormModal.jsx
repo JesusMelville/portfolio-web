@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Textarea, Icon, Badge } from '../../atoms';
 import { certCategories } from '../../../data';
+import { detectCertDetailsFromFile } from '../../../utils/certDetector';
 import styles from './CertFormModal.module.css';
 
 export function CertFormModal({ cert, isOpen, onClose, onSave }) {
@@ -10,9 +11,9 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
         date: new Date().getFullYear().toString(),
         credentialId: '',
         url: '',
-        category: 'frontend',
+        category: 'ai',
         skills: '',
-        badgeColor: '#8b5cf6',
+        badgeColor: '#ec4899',
         description: '',
         certificateFile: null,
         fileName: '',
@@ -20,6 +21,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
     });
 
     const [filePreview, setFilePreview] = useState(null);
+    const [autoFillNotice, setAutoFillNotice] = useState(null);
 
     useEffect(() => {
         if (cert) {
@@ -32,15 +34,16 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                 date: cert.date || new Date().getFullYear().toString(),
                 credentialId: cert.credentialId || '',
                 url: cert.url || '',
-                category: cert.category || 'frontend',
+                category: cert.category || 'ai',
                 skills: Array.isArray(cert.skills) ? cert.skills.join(', ') : (cert.skills || ''),
-                badgeColor: cert.badgeColor || '#8b5cf6',
+                badgeColor: cert.badgeColor || '#ec4899',
                 description: cert.description || '',
                 certificateFile: certFile,
                 fileName: cert.fileName || (isPdf ? 'documento-certificado.pdf' : 'comprobante-imagen'),
                 fileType: isPdf ? 'pdf' : 'image'
             });
             setFilePreview(certFile);
+            setAutoFillNotice(null);
         } else {
             setFormData({
                 title: '',
@@ -48,15 +51,16 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                 date: new Date().getFullYear().toString(),
                 credentialId: '',
                 url: '',
-                category: 'frontend',
+                category: 'ai',
                 skills: '',
-                badgeColor: '#8b5cf6',
+                badgeColor: '#ec4899',
                 description: '',
                 certificateFile: null,
                 fileName: '',
                 fileType: 'image'
             });
             setFilePreview(null);
+            setAutoFillNotice(null);
         }
     }, [cert, isOpen]);
 
@@ -76,8 +80,8 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
     const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 3 * 1024 * 1024) {
-                alert('El archivo es demasiado grande (máximo 3MB para almacenamiento local).');
+            if (file.size > 4 * 1024 * 1024) {
+                alert('El archivo es demasiado grande (máximo 4MB para almacenamiento en navegador).');
                 return;
             }
 
@@ -88,13 +92,32 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
             reader.onloadend = () => {
                 const base64Data = reader.result;
                 setFilePreview(base64Data);
+
+                // Run intelligent auto-detection
+                const detected = detectCertDetailsFromFile(file, base64Data);
+
                 setFormData(prev => ({
                     ...prev,
+                    title: detected.title || prev.title,
+                    issuer: detected.issuer || prev.issuer,
+                    date: detected.date || prev.date,
+                    credentialId: detected.credentialId || prev.credentialId,
+                    url: detected.url || prev.url,
+                    category: detected.category || prev.category,
+                    badgeColor: detected.badgeColor || prev.badgeColor,
+                    skills: detected.skills || prev.skills,
+                    description: detected.description || prev.description,
                     certificateFile: base64Data,
                     certificateImage: base64Data, // backward compatibility
                     fileName: file.name,
                     fileType: detectedType
                 }));
+
+                setAutoFillNotice({
+                    title: detected.title,
+                    issuer: detected.issuer,
+                    category: detected.category
+                });
             };
             reader.readAsDataURL(file);
         }
@@ -102,6 +125,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
 
     const handleRemoveFile = () => {
         setFilePreview(null);
+        setAutoFillNotice(null);
         setFormData(prev => ({
             ...prev,
             certificateFile: null,
@@ -134,7 +158,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                                 {cert ? 'Editar Certificación' : 'Subir Nueva Certificación'}
                             </h3>
                             <p className={styles.modalSubtitle}>
-                                Añade los datos y comprobante oficial (PDF, PNG, JPG) de tu certificado
+                                Sube tu PDF/Imagen y el sistema autocompletará los datos automáticamente
                             </p>
                         </div>
                     </div>
@@ -145,13 +169,92 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
 
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.formBody}>
+                        
+                        {/* UPLOAD SECTION FIRST (WITH AUTO-FILL MAGIC) */}
+                        <div className={styles.uploadSection}>
+                            <div className={styles.uploadHeader}>
+                                <label className={styles.label}>
+                                    <Icon name="wand" size={16} color="var(--color-accent-pink)" />
+                                    <span>Comprobante Oficial (PDF o Imagen) — <em>Autocompletado Inteligente</em></span>
+                                </label>
+                            </div>
+
+                            {filePreview ? (
+                                <div className={styles.previewContainer}>
+                                    {isPdf ? (
+                                        <div className={styles.pdfPreviewBox}>
+                                            <div className={styles.pdfIconCircle}>
+                                                <Icon name="pdf" size={36} color="#ef4444" />
+                                            </div>
+                                            <div className={styles.pdfInfo}>
+                                                <span className={styles.pdfBadge}>Documento PDF Adjunto</span>
+                                                <span className={styles.pdfFileName}>{formData.fileName || 'certificado.pdf'}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <img src={filePreview} alt="Comprobante" className={styles.previewImg} />
+                                    )}
+
+                                    <div className={styles.previewOverlay}>
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={handleRemoveFile}
+                                            iconLeft={<Icon name="trash" size={14} color="#f43f5e" />}
+                                        >
+                                            Cambiar Archivo
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <label className={styles.dropzone}>
+                                    <div className={styles.dropIcons}>
+                                        <div className={styles.magicBadge}>
+                                            <Icon name="wand" size={16} color="#ec4899" />
+                                            <span>Auto-Relleno Inteligente</span>
+                                        </div>
+                                        <div className={styles.iconsRow}>
+                                            <Icon name="pdf" size={26} color="#ef4444" />
+                                            <Icon name="image" size={26} color="var(--color-primary-light)" />
+                                        </div>
+                                    </div>
+                                    <span className={styles.dropText}>
+                                        <strong>Haz clic o arrastra tu Certificado (PDF, PNG, JPG)</strong>
+                                    </span>
+                                    <span className={styles.dropSubtext}>
+                                        Al subirlo, detectaremos el título, emisor, fecha, categoría y competencias para rellenar los espacios.
+                                    </span>
+                                    <input
+                                        type="file"
+                                        accept="image/*,application/pdf,.pdf"
+                                        className={styles.fileInput}
+                                        onChange={handleFileChange}
+                                    />
+                                </label>
+                            )}
+
+                            {autoFillNotice && (
+                                <div className={styles.autoFillAlert}>
+                                    <div className={styles.alertIcon}>
+                                        <Icon name="sparkles" size={18} color="#ec4899" />
+                                    </div>
+                                    <div className={styles.alertText}>
+                                        <strong>¡Datos autocompletados desde el archivo!</strong>
+                                        <p>Detectamos <span>{autoFillNotice.issuer}</span> y asignamos la categoría correspondiente. Puedes ajustar cualquier campo a continuación.</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* FORM FIELDS */}
                         <div className={styles.row}>
                             <Input
                                 label="Nombre de la Certificación"
                                 id="cert-title"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                placeholder="Ej. React.js Avanzado & Atomic Design"
+                                placeholder="Ej. Inteligencia Artificial & Prompt Engineering"
                                 required
                             />
                             <Input
@@ -159,7 +262,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                                 id="cert-issuer"
                                 value={formData.issuer}
                                 onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
-                                placeholder="Ej. Meta, Platzi, Coursera, freeCodeCamp"
+                                placeholder="Ej. DeepLearning.AI, OpenAI, Platzi, Meta"
                                 required
                             />
                         </div>
@@ -178,7 +281,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                                 id="cert-id"
                                 value={formData.credentialId}
                                 onChange={(e) => setFormData({ ...formData, credentialId: e.target.value })}
-                                placeholder="Ej. CERT-98421"
+                                placeholder="Ej. CERT-AI-89421"
                             />
                             <div className={styles.fieldGroup}>
                                 <label className={styles.label}>Categoría</label>
@@ -195,7 +298,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                         </div>
 
                         <Input
-                            label="Enlace Oficial de Verificación (URL)"
+                            label="Enlace Oficial de Verificación (URL Opcional)"
                             id="cert-url"
                             type="url"
                             value={formData.url}
@@ -208,7 +311,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                             id="cert-skills"
                             value={formData.skills}
                             onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                            placeholder="React, TypeScript, Hooks, Architecture"
+                            placeholder="Prompt Engineering, LLMs, OpenAI API, Python"
                         />
 
                         <Textarea
@@ -219,58 +322,6 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                             rows={3}
                             placeholder="Detalla las competencias clave adquiridas en este curso o certificación..."
                         />
-
-                        {/* Upload Certificate Image / PDF Proof */}
-                        <div className={styles.uploadSection}>
-                            <label className={styles.label}>
-                                Comprobante del Certificado (Permite PDF o Imágenes)
-                            </label>
-                            {filePreview ? (
-                                <div className={styles.previewContainer}>
-                                    {isPdf ? (
-                                        <div className={styles.pdfPreviewBox}>
-                                            <div className={styles.pdfIconCircle}>
-                                                <Icon name="pdf" size={36} color="#ef4444" />
-                                            </div>
-                                            <div className={styles.pdfInfo}>
-                                                <span className={styles.pdfBadge}>Documento PDF</span>
-                                                <span className={styles.pdfFileName}>{formData.fileName || 'certificado.pdf'}</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <img src={filePreview} alt="Comprobante" className={styles.previewImg} />
-                                    )}
-
-                                    <div className={styles.previewOverlay}>
-                                        <Button
-                                            type="button"
-                                            variant="secondary"
-                                            size="sm"
-                                            onClick={handleRemoveFile}
-                                            iconLeft={<Icon name="trash" size={14} color="#f43f5e" />}
-                                        >
-                                            Eliminar Archivo
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <label className={styles.dropzone}>
-                                    <div className={styles.dropIcons}>
-                                        <Icon name="pdf" size={28} color="#ef4444" />
-                                        <Icon name="image" size={28} color="var(--color-primary-light)" />
-                                    </div>
-                                    <span className={styles.dropText}>
-                                        Haz clic para subir o arrastra tu certificado en formato <strong>PDF</strong> o <strong>Imagen (PNG, JPG, WebP)</strong> (máx 3MB)
-                                    </span>
-                                    <input
-                                        type="file"
-                                        accept="image/*,application/pdf,.pdf"
-                                        className={styles.fileInput}
-                                        onChange={handleFileChange}
-                                    />
-                                </label>
-                            )}
-                        </div>
                     </div>
 
                     <div className={styles.footer}>

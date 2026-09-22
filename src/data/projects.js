@@ -1,5 +1,6 @@
 export const projectCategories = [
     { id: 'all', label: 'Todos los Proyectos' },
+    { id: 'ai', label: 'Inteligencia Artificial & ML' },
     { id: 'fullstack', label: 'Full Stack' },
     { id: 'frontend', label: 'Frontend & UI' },
     { id: 'tools', label: 'Extensiones & Herramientas' },

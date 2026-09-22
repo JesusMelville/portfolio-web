@@ -1,5 +1,6 @@
 export const certCategories = [
     { id: 'all', label: 'Todas las Certificaciones' },
+    { id: 'ai', label: 'Inteligencia Artificial & ML' },
     { id: 'frontend', label: 'Frontend & UI' },
     { id: 'fullstack', label: 'Full Stack & Web' },
     { id: 'backend', label: 'Backend & APIs' },
@@ -7,6 +8,18 @@ export const certCategories = [
 ];
 
 export const certifications = [
+    {
+        id: 'cert-ai-prompt',
+        title: 'Generative AI & Prompt Engineering for Developers',
+        issuer: 'DeepLearning.AI / OpenAI',
+        date: '2024',
+        credentialId: 'CERT-AI-99412',
+        url: 'https://github.com/JesusMelville',
+        category: 'ai',
+        badgeColor: '#ec4899',
+        skills: ['Prompt Engineering', 'LLMs & GPT-4', 'OpenAI API', 'Chain of Thought', 'Python AI'],
+        description: 'Construcción y orquestación de aplicaciones potenciadas por Inteligencia Artificial generativa, técnicas avanzadas de prompting, integración de APIs de modelos de lenguaje e interfaces conversacionales.'
+    },
     {
         id: 'cert-fullstack',
         title: 'Full Stack Web Development Professional',

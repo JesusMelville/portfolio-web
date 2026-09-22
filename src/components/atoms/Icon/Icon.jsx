@@ -62,6 +62,29 @@ export function Icon({ name, size = 20, className = '', color = 'currentColor', 
                 </svg>
             );
 
+        case 'brain':
+        case 'ai':
+        case 'bot':
+            return (
+                <svg {...props} viewBox="0 0 24 24">
+                    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+                    <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
+                    <path d="M12 5v14" />
+                </svg>
+            );
+
+        case 'wand':
+        case 'magic':
+            return (
+                <svg {...props} viewBox="0 0 24 24">
+                    <path d="m15 4-2 4 4-2Z" />
+                    <path d="M15 2v2" />
+                    <path d="M19 6h2" />
+                    <path d="m14 9 7 7-3 3-7-7Z" />
+                    <path d="m3 21 9-9" />
+                </svg>
+            );
+
         case 'certificate':
         case 'award':
             return (

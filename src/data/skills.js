@@ -29,6 +29,19 @@ export const skillCategories = [
         ]
     },
     {
+        id: 'ai',
+        title: 'Inteligencia Artificial & Automatización',
+        icon: 'brain',
+        description: 'Ingeniería de prompts, integración de modelos de lenguaje (LLMs) y agentes inteligentes.',
+        skills: [
+            { name: 'Prompt Engineering & LLMs', level: 90, badge: 'Avanzado', highlight: true },
+            { name: 'OpenAI API & Anthropic SDK', level: 88, badge: 'Avanzado', highlight: true },
+            { name: 'Automatización & Agentes AI', level: 84, badge: 'Intermedio-Alto', highlight: true },
+            { name: 'RAG & Integración de Contexto', level: 78, badge: 'Intermedio', highlight: false },
+            { name: 'Python para IA & Scripting', level: 82, badge: 'Intermedio-Alto', highlight: true }
+        ]
+    },
+    {
         id: 'tools',
         title: 'Herramientas, DevOps & Arquitectura',
         icon: 'sparkles',

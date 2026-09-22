@@ -4,6 +4,7 @@ import styles from './ProjectCard.module.css';
 
 export function ProjectCard({ project, onOpenDetails }) {
     const categoryLabels = {
+        ai: 'Inteligencia Artificial & ML',
         fullstack: 'Full Stack',
         frontend: 'Frontend & UI',
         tools: 'Herramientas & Extensions',
