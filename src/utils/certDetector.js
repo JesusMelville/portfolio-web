@@ -123,6 +123,29 @@ const TOPIC_RULES = [
         ],
         suggestedSkills: ['Clean Code', 'SOLID Principles', 'Git Flow', 'Patrones de Diseño', 'Testing & CI/CD'],
         defaultDescription: 'Especialización en buenas prácticas de ingeniería de software, arquitectura modular desacoplada, principios SOLID y flujos de trabajo profesionales.'
+    },
+    {
+        category: 'technologies',
+        badgeColor: '#6366f1',
+        keywords: [
+            /tecnologias?/i,
+            /technology/i,
+            /technologies/i,
+            /herramientas/i,
+            /tools/i,
+            /framework/i,
+            /lenguaje/i,
+            /language/i,
+            /cloud/i,
+            /devops/i,
+            /software\s*engineering/i,
+            /ingenieria\s*de\s*software/i,
+            /linux/i,
+            /bash/i,
+            /docker/i
+        ],
+        suggestedSkills: ['Tecnologías Web', 'Herramientas de Desarrollo', 'Cloud Computing', 'Git & Control de Versiones', 'DevOps & CI/CD'],
+        defaultDescription: 'Acreditación y dominio en herramientas y tecnologías modernas de desarrollo de software, optimización del flujo de trabajo y productividad técnica.'
     }
 ];
 
@@ -240,6 +263,7 @@ export function detectCertDetailsFromFile(file, base64Data) {
     let detectedTitle = cleanTitleString(fileName);
     if (!detectedTitle || detectedTitle === 'Certificación Profesional') {
         if (matchedTopic.category === 'ai') detectedTitle = 'Inteligencia Artificial & Prompt Engineering';
+        else if (matchedTopic.category === 'technologies') detectedTitle = 'Tecnologías & Herramientas de Software';
         else if (matchedTopic.category === 'frontend') detectedTitle = 'Frontend & React.js Moderno';
         else if (matchedTopic.category === 'backend') detectedTitle = 'Backend Architecture & Node.js';
         else if (matchedTopic.category === 'fullstack') detectedTitle = 'Full Stack Web Development';
