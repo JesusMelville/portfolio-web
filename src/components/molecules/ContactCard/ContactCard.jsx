@@ -94,7 +94,7 @@ export function ContactCard({ email, location, github, linkedin }) {
             {location && (
                 <div className={styles.locationFooter}>
                     <Icon name="map-pin" size={16} color="var(--text-accent)" />
-                    <span>Ubicación: {location} (Disponible para trabajo Remoto e Híbrido)</span>
+                    <span>Ubicación: Perú 🇵🇪 (Disponible para trabajo Remoto e Híbrido global)</span>
                 </div>
             )}
         </div>

@@ -27,7 +27,7 @@ export function About() {
 
                         <div className={styles.locationBadge}>
                             <Icon name="map-pin" size={18} color="var(--color-primary-light)" />
-                            <span>Basado en {profile.location} • Abierto a colaboración remota global</span>
+                            <span>De Perú 🇵🇪 • Abierto a colaboración remota global</span>
                         </div>
                     </div>
 

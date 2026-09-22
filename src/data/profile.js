@@ -21,7 +21,7 @@ export const profile = {
             { title: 'Rendimiento y UX', desc: 'Optimización de carga, Micro-animaciones y Accesibilidad' }
         ]
     },
-    location: 'República Dominicana',
+    location: 'Perú',
     email: 'jesusmelvillemm@gmail.com',
     github: 'https://github.com/JesusMelville',
     linkedin: 'https://linkedin.com/in/jesusmelville',
