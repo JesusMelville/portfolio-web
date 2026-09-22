@@ -55,8 +55,27 @@ export function ProjectModal({ project, onClose }) {
                 </div>
 
                 <div className={styles.content}>
+                    {/* IMPACT & PERFORMANCE METRICS HUD */}
+                    {project.metrics && project.metrics.length > 0 && (
+                        <div className={styles.hudSection}>
+                            <h4 className={styles.hudSectionTitle}>
+                                <Icon name="sparkles" size={16} color="var(--accent-color)" />
+                                <span>Métricas Clave de Rendimiento & Impacto</span>
+                            </h4>
+                            <div className={styles.hudGrid}>
+                                {project.metrics.map((metric, idx) => (
+                                    <div key={idx} className={styles.hudCard}>
+                                        <div className={styles.hudCardGlow} />
+                                        <span className={styles.hudValue}>{metric.value}</span>
+                                        <span className={styles.hudLabel}>{metric.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     <div className={styles.section}>
-                        <h4 className={styles.sectionTitle}>Descripción del Proyecto</h4>
+                        <h4 className={styles.sectionTitle}>Arquitectura & Solución</h4>
                         <p className={styles.paragraph}>{project.longDescription || project.description}</p>
                     </div>
 

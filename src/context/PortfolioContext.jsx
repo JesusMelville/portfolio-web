@@ -27,7 +27,8 @@ export function PortfolioProvider({ children }) {
                         ...p,
                         tags: Array.isArray(p.tags)
                             ? p.tags
-                            : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : [])
+                            : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
+                        metrics: Array.isArray(p.metrics) ? p.metrics : []
                     }));
                 }
             }
@@ -117,7 +118,7 @@ export function PortfolioProvider({ children }) {
             const githubRepos = await fetchGitHubRepos();
 
             setProjects(prevProjects => {
-                // Map existing project custom overrides (such as custom category or featured status)
+                // Map existing project custom overrides (such as custom category, metrics, or featured status)
                 const existingMap = new Map(prevProjects.map(p => [p.id.toLowerCase(), p]));
 
                 const merged = githubRepos.map(repo => {
@@ -129,7 +130,8 @@ export function PortfolioProvider({ children }) {
                             featured: existing.featured !== undefined ? existing.featured : repo.featured,
                             visible: existing.visible !== undefined ? existing.visible : true,
                             customDescription: existing.customDescription || repo.description,
-                            tags: existing.tags && existing.tags.length > 0 ? existing.tags : repo.tags
+                            tags: existing.tags && existing.tags.length > 0 ? existing.tags : repo.tags,
+                            metrics: existing.metrics && existing.metrics.length > 0 ? existing.metrics : (repo.metrics || [])
                         };
                     }
                     return repo;
@@ -166,8 +168,8 @@ export function PortfolioProvider({ children }) {
             date: new Date().getFullYear().toString(),
             credentialId: '',
             url: '',
-            category: 'frontend',
-            badgeColor: '#8b5cf6',
+            category: 'ai',
+            badgeColor: '#ec4899',
             description: '',
             certificateFile: null,
             certificateImage: null,
@@ -205,6 +207,10 @@ export function PortfolioProvider({ children }) {
             ? newProject.tags
             : (typeof newProject.tags === 'string' ? newProject.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
 
+        const metrics = Array.isArray(newProject.metrics)
+            ? newProject.metrics
+            : [];
+
         const projectWithId = {
             title: 'Nuevo Proyecto',
             subtitle: '',
@@ -216,9 +222,11 @@ export function PortfolioProvider({ children }) {
             demo: '',
             color: '#8b5cf6',
             isFromGitHub: false,
+            features: [],
             ...newProject,
             id: newProject.id || `proj-${Date.now()}`,
-            tags
+            tags,
+            metrics
         };
         setProjects(prev => [projectWithId, ...prev]);
         return projectWithId;
@@ -232,7 +240,12 @@ export function PortfolioProvider({ children }) {
                         ? updatedData.tags
                         : (typeof updatedData.tags === 'string' ? updatedData.tags.split(',').map(t => t.trim()).filter(Boolean) : []))
                     : p.tags;
-                return { ...p, ...updatedData, tags };
+
+                const metrics = updatedData.metrics !== undefined
+                    ? (Array.isArray(updatedData.metrics) ? updatedData.metrics : [])
+                    : (p.metrics || []);
+
+                return { ...p, ...updatedData, tags, metrics };
             }
             return p;
         }));

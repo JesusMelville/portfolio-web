@@ -25,6 +25,11 @@ export function ProjectCard({ project, onOpenDetails }) {
                             Destacado
                         </Badge>
                     )}
+                    {project.metrics && project.metrics.length > 0 && (
+                        <span className={styles.metricChip} title={`${project.metrics[0].label}: ${project.metrics[0].value}`}>
+                            ⚡ {project.metrics[0].value}
+                        </span>
+                    )}
                 </div>
 
                 <div className={styles.externalLinks}>

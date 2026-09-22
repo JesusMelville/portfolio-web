@@ -15,7 +15,8 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
         demo: '',
         featured: false,
         visible: true,
-        color: '#8b5cf6'
+        color: '#8b5cf6',
+        metrics: []
     });
 
     useEffect(() => {
@@ -31,7 +32,13 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
                 demo: project.demo || '',
                 featured: Boolean(project.featured),
                 visible: project.visible !== false,
-                color: project.color || '#8b5cf6'
+                color: project.color || '#8b5cf6',
+                metrics: Array.isArray(project.metrics) && project.metrics.length > 0
+                    ? project.metrics.map(m => ({ label: m.label || '', value: m.value || '' }))
+                    : [
+                        { label: 'Rendimiento', value: '99/100' },
+                        { label: 'Arquitectura', value: 'Atomic Design' }
+                    ]
             });
         } else {
             setFormData({
@@ -45,7 +52,11 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
                 demo: '',
                 featured: false,
                 visible: true,
-                color: '#8b5cf6'
+                color: '#8b5cf6',
+                metrics: [
+                    { label: 'Rendimiento', value: '99/100' },
+                    { label: 'Frame Rate', value: '120 FPS' }
+                ]
             });
         }
     }, [project, isOpen]);
@@ -63,9 +74,33 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
         };
     }, [isOpen, onClose]);
 
+    const handleAddMetric = () => {
+        setFormData(prev => ({
+            ...prev,
+            metrics: [...prev.metrics, { label: '', value: '' }]
+        }));
+    };
+
+    const handleRemoveMetric = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            metrics: prev.metrics.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleMetricChange = (index, field, val) => {
+        setFormData(prev => {
+            const nextMetrics = [...prev.metrics];
+            nextMetrics[index] = { ...nextMetrics[index], [field]: val };
+            return { ...prev, metrics: nextMetrics };
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        // Clean empty metrics
+        const cleanedMetrics = formData.metrics.filter(m => m.label.trim() || m.value.trim());
+        onSave({ ...formData, metrics: cleanedMetrics });
         onClose();
     };
 
@@ -84,7 +119,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
                                 {project ? 'Editar Proyecto' : 'Crear Proyecto Manual'}
                             </h3>
                             <p className={styles.modalSubtitle}>
-                                Personaliza los detalles, enlaces y categorías visibles en tu portafolio
+                                Personaliza detalles, enlaces y métricas de impacto visibles en tu portafolio
                             </p>
                         </div>
                     </div>
@@ -163,6 +198,53 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
                             required
                         />
 
+                        {/* DYNAMIC IMPACT METRICS HUD SECTION */}
+                        <div className={styles.metricsSection}>
+                            <div className={styles.metricsHeader}>
+                                <label className={styles.label}>
+                                    <Icon name="sparkles" size={16} color="var(--color-primary-light)" />
+                                    <span>Métricas de Rendimiento & Impacto (HUD Tecnológico)</span>
+                                </label>
+                                <button
+                                    type="button"
+                                    className={styles.addMetricBtn}
+                                    onClick={handleAddMetric}
+                                >
+                                    <Icon name="plus" size={14} />
+                                    <span>Agregar Métrica</span>
+                                </button>
+                            </div>
+
+                            <div className={styles.metricsList}>
+                                {formData.metrics.map((metric, idx) => (
+                                    <div key={idx} className={styles.metricRow}>
+                                        <input
+                                            type="text"
+                                            className={styles.metricInput}
+                                            value={metric.value}
+                                            onChange={(e) => handleMetricChange(idx, 'value', e.target.value)}
+                                            placeholder="Valor (ej. 99/100, 120 FPS, <5ms)"
+                                        />
+                                        <input
+                                            type="text"
+                                            className={styles.metricInput}
+                                            value={metric.label}
+                                            onChange={(e) => handleMetricChange(idx, 'label', e.target.value)}
+                                            placeholder="Etiqueta (ej. Lighthouse, Frame Rate)"
+                                        />
+                                        <button
+                                            type="button"
+                                            className={styles.deleteMetricBtn}
+                                            onClick={() => handleRemoveMetric(idx)}
+                                            title="Eliminar Métrica"
+                                        >
+                                            <Icon name="trash" size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         <Textarea
                             label="Descripción Breve (para tarjeta)"
                             id="proj-desc"
@@ -174,7 +256,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
                         />
 
                         <Textarea
-                            label="Descripción Extendida (para modal)"
+                            label="Descripción Extendida (para Caso de Estudio / Modal)"
                             id="proj-long-desc"
                             value={formData.longDescription}
                             onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
