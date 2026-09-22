@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Badge, Icon } from '../../atoms';
-import { SkillCard } from '../../molecules';
+import { SkillCard, FilterTabs } from '../../molecules';
 import { skillCategories } from '../../../data';
 import styles from './SkillsSection.module.css';
 
+const skillFilterTabs = [
+    { id: 'all', label: 'Todas las Habilidades' },
+    { id: 'frontend', label: 'Frontend & UI' },
+    { id: 'backend', label: 'Backend & Cloud' },
+    { id: 'ai', label: 'IA & Automatización' },
+    { id: 'tools', label: 'Herramientas & DevOps' }
+];
+
 export function SkillsSection() {
+    const [selectedCategory, setSelectedCategory] = useState('all');
+
+    const filteredCategories = useMemo(() => {
+        if (selectedCategory === 'all') return skillCategories;
+        return skillCategories.filter(c => c.id === selectedCategory);
+    }, [selectedCategory]);
+
+    const categoryCounts = useMemo(() => {
+        const counts = { all: skillCategories.reduce((acc, cat) => acc + cat.skills.length, 0) };
+        skillCategories.forEach(cat => {
+            counts[cat.id] = cat.skills.length;
+        });
+        return counts;
+    }, []);
+
     return (
         <section className={styles.skillsSection} id="habilidades">
             <div className={`container ${styles.sectionContainer}`}>
@@ -14,12 +37,21 @@ export function SkillsSection() {
                     </Badge>
                     <h2 className={styles.sectionTitle}>Habilidades Técnicas</h2>
                     <p className={styles.sectionSubtitle}>
-                        Herramientas, frameworks y metodologías que empleo a diario para crear software robusto y escalable.
+                        Herramientas, frameworks, lenguajes y metodologías que empleo a diario para crear software robusto, moderno y escalable.
                     </p>
                 </div>
 
+                <div className={styles.controlBar}>
+                    <FilterTabs
+                        categories={skillFilterTabs}
+                        activeCategory={selectedCategory}
+                        onSelectCategory={setSelectedCategory}
+                        counts={categoryCounts}
+                    />
+                </div>
+
                 <div className={styles.categoriesStack}>
-                    {skillCategories.map((category) => (
+                    {filteredCategories.map((category) => (
                         <div key={category.id} className={styles.categoryBlock}>
                             <div className={styles.categoryInfo}>
                                 <div className={styles.iconCircle}>
