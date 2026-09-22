@@ -135,8 +135,10 @@
     width: 280px;
     height: 280px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--color-primary-rgb), 0.4) 0%, rgba(var(--color-secondary-rgb), 0.2) 60%, transparent 80%);
-    filter: blur(40px);
+    background: radial-gradient(circle, rgba(var(--color-primary-rgb), 0.35) 0%, rgba(var(--color-secondary-rgb), 0.15) 60%, transparent 80%);
+    filter: blur(30px);
+    will-change: transform;
+    transform: translateZ(0);
     z-index: 0;
 }
 
@@ -147,6 +149,8 @@
     border-radius: 50%;
     border: 2px dashed rgba(var(--color-primary-rgb), 0.35);
     animation: rotateSlow 25s linear infinite;
+    will-change: transform;
+    transform: translateZ(0);
     z-index: 1;
 }
 

@@ -26,7 +26,7 @@ export function CertCard({ cert, onViewCert }) {
                             <span className={styles.pdfTileText}>Documento PDF Adjunto</span>
                         </div>
                     ) : (
-                        <img src={certFile} alt={cert.title} className={styles.thumbImg} />
+                        <img src={certFile} alt={cert.title} className={styles.thumbImg} loading="lazy" decoding="async" />
                     )}
                     <span className={styles.thumbOverlay}>
                         <Icon name="eye" size={16} />

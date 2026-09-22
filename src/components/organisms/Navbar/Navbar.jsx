@@ -21,15 +21,21 @@ export function Navbar({ theme, toggleTheme }) {
     const activeSection = useScrollSpy(navItems.map(item => item.id), 120);
 
     useEffect(() => {
+        let ticking = false;
+
         const handleScroll = () => {
-            if (window.scrollY > 30) {
-                setScrolled(true);
-            } else {
-                setScrolled(false);
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const isScrolled = window.scrollY > 30;
+                    setScrolled(prev => prev === isScrolled ? prev : isScrolled);
+                    ticking = false;
+                });
+                ticking = true;
             }
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
