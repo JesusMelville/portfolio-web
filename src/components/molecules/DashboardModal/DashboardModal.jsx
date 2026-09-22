@@ -37,6 +37,19 @@ export function DashboardModal() {
     const [editingProject, setEditingProject] = useState(null);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
+    React.useEffect(() => {
+        if (!isDashboardOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') closeDashboard();
+        };
+        document.body.style.overflow = 'hidden';
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.body.style.overflow = '';
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isDashboardOpen, closeDashboard]);
+
     if (!isDashboardOpen) return null;
 
     const handleOpenAddCert = () => {

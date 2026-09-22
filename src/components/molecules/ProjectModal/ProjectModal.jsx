@@ -4,6 +4,8 @@ import styles from './ProjectModal.module.css';
 
 export function ProjectModal({ project, onClose }) {
     useEffect(() => {
+        if (!project) return;
+
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
                 onClose();
@@ -17,7 +19,7 @@ export function ProjectModal({ project, onClose }) {
             document.body.style.overflow = '';
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [onClose]);
+    }, [project, onClose]);
 
     if (!project) return null;
 
@@ -40,7 +42,7 @@ export function ProjectModal({ project, onClose }) {
                 <div className={styles.header}>
                     <div className={styles.badges}>
                         <Badge variant="primary" size="md">
-                            {project.category.toUpperCase()}
+                            {project.category ? project.category.toUpperCase() : 'PROYECTO'}
                         </Badge>
                         {project.featured && (
                             <Badge variant="warning" size="md" icon={<Icon name="star" size={14} color="#fbbf24" />}>
@@ -77,7 +79,7 @@ export function ProjectModal({ project, onClose }) {
                     <div className={styles.section}>
                         <h4 className={styles.sectionTitle}>Stack Tecnológico</h4>
                         <div className={styles.tagsGrid}>
-                            {project.tags.map((tag) => (
+                            {project.tags && project.tags.map((tag) => (
                                 <Badge key={tag} variant="default" size="md">
                                     {tag}
                                 </Badge>

@@ -4,18 +4,20 @@ import styles from './CertViewerModal.module.css';
 
 export function CertViewerModal({ cert, isOpen, onClose }) {
     useEffect(() => {
+        if (!isOpen || !cert) return;
+
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') onClose();
         };
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            window.addEventListener('keydown', handleKeyDown);
-        }
+
+        document.body.style.overflow = 'hidden';
+        window.addEventListener('keydown', handleKeyDown);
+
         return () => {
             document.body.style.overflow = '';
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [isOpen, onClose]);
+    }, [isOpen, cert, onClose]);
 
     if (!isOpen || !cert) return null;
 

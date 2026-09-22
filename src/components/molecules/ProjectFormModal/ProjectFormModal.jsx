@@ -50,6 +50,19 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
         }
     }, [project, isOpen]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        document.body.style.overflow = 'hidden';
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.body.style.overflow = '';
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onClose]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);

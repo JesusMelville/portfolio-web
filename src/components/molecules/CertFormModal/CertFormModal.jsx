@@ -51,6 +51,19 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
         }
     }, [cert, isOpen]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        document.body.style.overflow = 'hidden';
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.body.style.overflow = '';
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onClose]);
+
     const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
