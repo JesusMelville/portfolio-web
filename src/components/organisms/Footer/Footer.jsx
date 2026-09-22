@@ -13,83 +13,63 @@ export function Footer() {
     return (
         <footer className={styles.footer}>
             <div className={`container ${styles.footerContainer}`}>
-                <div className={styles.topRow}>
-                    <div className={styles.brand}>
-                        <a href="#inicio" className={styles.logo}>
-                            <span className={styles.logoIcon}>JM</span>
-                            <span className={styles.logoText}>Jesus<span className={styles.logoAccent}>Melville</span></span>
-                        </a>
-                        <p className={styles.tagline}>
-                            Desarrollador Web Full Stack apasionado por la ingeniería frontend moderna y arquitecturas limpias.
-                        </p>
-                    </div>
-
-                    <div className={styles.quickLinks}>
-                        <span className={styles.linksHeading}>Navegación</span>
-                        <ul className={styles.linksList}>
-                            <li><a href="#inicio">Inicio</a></li>
-                            <li><a href="#sobre-mi">Sobre Mí</a></li>
-                            <li><a href="#proyectos">Proyectos</a></li>
-                            <li><a href="#certificaciones">Certificaciones</a></li>
-                            <li><a href="#habilidades">Habilidades</a></li>
-                            <li><a href="#contacto">Contacto</a></li>
-                        </ul>
-                    </div>
-
-                    <div className={styles.socialCol}>
-                        <span className={styles.linksHeading}>Conectar & Gestión</span>
-                        <div className={styles.socialIcons}>
-                            <a
-                                href={profile.github}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.socialIconBtn}
-                                aria-label="GitHub"
-                            >
-                                <Icon name="github" size={20} />
-                            </a>
-                            <a
-                                href={profile.linkedin}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.socialIconBtn}
-                                aria-label="LinkedIn"
-                            >
-                                <Icon name="linkedin" size={20} />
-                            </a>
-                            <a
-                                href={`mailto:${profile.email}`}
-                                className={styles.socialIconBtn}
-                                aria-label="Gmail"
-                            >
-                                <Icon name="gmail" size={20} color="#ea4335" />
-                            </a>
-                        </div>
-
-                        <button
-                            type="button"
-                            className={styles.dashFooterBtn}
-                            onClick={openDashboard}
-                        >
-                            <Icon name="settings" size={16} />
-                            <span>Panel de Control (Dashboard)</span>
-                        </button>
-                    </div>
+                <div className={styles.brand}>
+                    <span className={styles.logoIcon}>JM</span>
+                    <span className={styles.copyright}>
+                        &copy; {new Date().getFullYear()} <strong>{profile.name}</strong> • Desarrollador Web Full Stack
+                    </span>
                 </div>
 
-                <div className={styles.bottomRow}>
-                    <p className={styles.copyright}>
-                        &copy; {new Date().getFullYear()} {profile.name}. Todos los derechos reservados. Construido con React 18, Vite y Atomic Design.
-                    </p>
+                <div className={styles.socialCol}>
+                    <a
+                        href={profile.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.socialIconBtn}
+                        aria-label="GitHub"
+                        title="GitHub"
+                    >
+                        <Icon name="github" size={16} />
+                    </a>
+                    <a
+                        href={profile.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.socialIconBtn}
+                        aria-label="LinkedIn"
+                        title="LinkedIn"
+                    >
+                        <Icon name="linkedin" size={16} />
+                    </a>
+                    <a
+                        href={`mailto:${profile.email}`}
+                        className={styles.socialIconBtn}
+                        aria-label="Enviar correo"
+                        title="Enviar correo"
+                    >
+                        <Icon name="gmail" size={16} color="#ea4335" />
+                    </a>
+                </div>
+
+                <div className={styles.actions}>
+                    <button
+                        type="button"
+                        className={styles.dashFooterBtn}
+                        onClick={openDashboard}
+                        title="Abrir Panel de Control"
+                    >
+                        <Icon name="settings" size={14} />
+                        <span>Dashboard</span>
+                    </button>
 
                     <button
                         type="button"
                         onClick={scrollToTop}
                         className={styles.backToTop}
-                        aria-label="Volver al inicio"
+                        aria-label="Volver arriba"
+                        title="Volver arriba"
                     >
-                        <span>Volver arriba</span>
-                        <Icon name="arrow-up" size={16} />
+                        <Icon name="arrow-up" size={15} />
                     </button>
                 </div>
             </div>

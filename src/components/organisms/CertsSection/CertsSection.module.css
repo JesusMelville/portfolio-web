@@ -1,9 +1,9 @@
 .certsSection {
-    padding: 3.5rem 0 5rem;
+    padding: 2.25rem 0 3.5rem;
     position: relative;
-    min-height: calc(100vh - 75px);
+    min-height: calc(100vh - 75px - 55px);
     display: flex;
-    align-items: center;
+    flex-direction: column;
 }
 
 .sectionContainer {

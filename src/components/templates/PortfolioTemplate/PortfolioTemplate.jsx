@@ -66,55 +66,6 @@ export function PortfolioTemplate() {
                 </div>
             </main>
 
-            {/* Floating Bottom View Navigation Switcher */}
-            <nav className={styles.bottomNav} aria-label="Navegación entre apartados">
-                <div className={styles.bottomNavContainer}>
-                    <button
-                        type="button"
-                        className={`${styles.navArrowBtn} ${isFirst ? styles.btnDisabled : ''}`}
-                        onClick={prevView}
-                        disabled={isFirst}
-                        title={!isFirst ? `Ir a ${navViews[currentIndex - 1]?.label}` : undefined}
-                        aria-label="Apartado anterior"
-                    >
-                        <Icon name="chevron-right" size={18} style={{ transform: 'rotate(180deg)' }} />
-                        <span className={styles.arrowBtnText}>Anterior</span>
-                    </button>
-
-                    <div className={styles.pillsList}>
-                        {navViews.map((item, idx) => {
-                            const isActive = item.id === currentView;
-                            return (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    className={`${styles.navPill} ${isActive ? styles.activePill : ''}`}
-                                    onClick={() => navigateTo(item.id)}
-                                    title={item.label}
-                                    aria-label={`Ver sección ${item.label}`}
-                                    aria-current={isActive ? 'page' : undefined}
-                                >
-                                    <span className={styles.pillNumber}>{item.number}</span>
-                                    <span className={styles.pillLabel}>{item.label}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <button
-                        type="button"
-                        className={`${styles.navArrowBtn} ${isLast ? styles.btnDisabled : ''}`}
-                        onClick={nextView}
-                        disabled={isLast}
-                        title={!isLast ? `Ir a ${navViews[currentIndex + 1]?.label}` : undefined}
-                        aria-label="Siguiente apartado"
-                    >
-                        <span className={styles.arrowBtnText}>Siguiente</span>
-                        <Icon name="chevron-right" size={18} />
-                    </button>
-                </div>
-            </nav>
-
             {/* Footer */}
             <Footer />
 
