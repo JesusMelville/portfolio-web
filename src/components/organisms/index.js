@@ -1,5 +1,8 @@
-export { Hero } from './Hero/Hero';
-export { Projects } from './Projects/Projects';
-export { Skills } from './Skills/Skills';
-export { Contact } from './Contact/Contact';
-export { Footer } from './Footer/Footer';
+export * from './Navbar/Navbar';
+export * from './Hero/Hero';
+export * from './About/About';
+export * from './ProjectsSection/ProjectsSection';
+export * from './CertsSection/CertsSection';
+export * from './SkillsSection/SkillsSection';
+export * from './ContactSection/ContactSection';
+export * from './Footer/Footer';

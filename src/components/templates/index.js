@@ -1,1 +1,1 @@
-export { PortfolioTemplate } from './PortfolioTemplate/PortfolioTemplate';
+export * from './PortfolioTemplate/PortfolioTemplate';

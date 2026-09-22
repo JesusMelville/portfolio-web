@@ -1,0 +1,92 @@
+.skillsSection {
+    padding: 6rem 0;
+    position: relative;
+}
+
+.sectionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+}
+
+.sectionHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.sectionTitle {
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 800;
+}
+
+.sectionSubtitle {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.categoriesStack {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.categoryBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+}
+
+.categoryInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.iconCircle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--color-primary-rgb), 0.12);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+    flex-shrink: 0;
+}
+
+.categoryTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.categoryDesc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.skillsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .categoryBlock {
+        padding: 1.5rem;
+    }
+
+    .skillsGrid {
+        grid-template-columns: 1fr;
+    }
+}

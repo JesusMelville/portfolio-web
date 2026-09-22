@@ -1,61 +1,112 @@
-import { useState } from 'react';
-import styles from '@styles/components/molecules/ContactForm.module.css';
+import React, { useState } from 'react';
+import { Button, Input, Textarea, Icon } from '../../atoms';
+import styles from './ContactForm.module.css';
 
-export function ContactForm() {
-    const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-    const [submitted, setSubmitted] = useState(false);
+export function ContactForm({ recipientEmail }) {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
+    const [status, setStatus] = useState('idle'); // 'idle' | 'sending' | 'success'
+
+    const handleChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setSubmitted(true);
-        setTimeout(() => setSubmitted(false), 3000);
-        setFormData({ name: '', email: '', message: '' });
+        setStatus('sending');
+
+        // Simulate sending and generate mailto link fallback
+        setTimeout(() => {
+            setStatus('success');
+            const mailtoUrl = `mailto:${recipientEmail}?subject=${encodeURIComponent(formData.subject || 'Mensaje de ' + formData.name)}&body=${encodeURIComponent(`Hola Jesus,\n\nMi nombre es: ${formData.name}\nMi email es: ${formData.email}\n\nMensaje:\n${formData.message}`)}`;
+            
+            // Try to open mailto in background
+            const win = window.open(mailtoUrl, '_blank');
+            if (win) win.focus();
+
+            setTimeout(() => {
+                setStatus('idle');
+                setFormData({ name: '', email: '', subject: '', message: '' });
+            }, 6000);
+        }, 800);
     };
 
     return (
-        <form className={styles.contactForm} onSubmit={handleSubmit}>
-            {submitted && (
-                <div className={styles.success}>
-                    Mensaje enviado correctamente!
+        <div className={styles.formContainer}>
+            <div className={styles.formHeader}>
+                <h3 className={styles.formTitle}>Envíame un mensaje directo</h3>
+                <p className={styles.formSubtitle}>Completa el formulario y te responderé a la brevedad.</p>
+            </div>
+
+            {status === 'success' && (
+                <div className={styles.successBanner}>
+                    <div className={styles.successIcon}>
+                        <Icon name="check" size={20} color="var(--color-accent-emerald)" />
+                    </div>
+                    <div>
+                        <h4 className={styles.successTitle}>¡Mensaje preparado con éxito!</h4>
+                        <p className={styles.successText}>
+                            Se ha abierto tu cliente de correo para enviar el mensaje directamente a <strong>{recipientEmail}</strong>.
+                        </p>
+                    </div>
                 </div>
             )}
-            
-            <div className={styles.formGroup}>
-                <label className={styles.label}>Nombre</label>
-                <input
-                    type="text"
-                    className={styles.input}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+
+            <form className={styles.form} onSubmit={handleSubmit}>
+                <div className={styles.row}>
+                    <Input
+                        label="Tu Nombre"
+                        id="contact-name"
+                        value={formData.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
+                        placeholder="Ej. Alexander Smith"
+                        required
+                    />
+                    <Input
+                        label="Tu Correo Electrónico"
+                        id="contact-email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleChange('email', e.target.value)}
+                        placeholder="tu@email.com"
+                        required
+                    />
+                </div>
+
+                <Input
+                    label="Asunto"
+                    id="contact-subject"
+                    value={formData.subject}
+                    onChange={(e) => handleChange('subject', e.target.value)}
+                    placeholder="Ej. Propuesta de proyecto / Oportunidad laboral"
                     required
                 />
-            </div>
 
-            <div className={styles.formGroup}>
-                <label className={styles.label}>Email</label>
-                <input
-                    type="email"
-                    className={styles.input}
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                />
-            </div>
-
-            <div className={styles.formGroup}>
-                <label className={styles.label}>Mensaje</label>
-                <textarea
-                    className={styles.textarea}
-                    rows="5"
+                <Textarea
+                    label="Mensaje"
+                    id="contact-message"
+                    rows={4}
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    onChange={(e) => handleChange('message', e.target.value)}
+                    placeholder="Cuéntame sobre tu proyecto, objetivos, plazos o cualquier consulta..."
                     required
-                ></textarea>
-            </div>
+                />
 
-            <button type="submit" className={styles.submitButton}>
-                Enviar mensaje
-            </button>
-        </form>
+                <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    disabled={status === 'sending'}
+                    iconRight={<Icon name="send" size={18} />}
+                    className={styles.submitBtn}
+                >
+                    {status === 'sending' ? 'Procesando mensaje...' : 'Enviar Mensaje Ahora'}
+                </Button>
+            </form>
+        </div>
     );
 }

@@ -1,0 +1,127 @@
+.about {
+    padding: 6rem 0;
+    position: relative;
+}
+
+.aboutContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+}
+
+.sectionHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.sectionTitle {
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 800;
+}
+
+.sectionSubtitle {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+.bioColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.paragraph {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.locationBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.highlightsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.highlightCard {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    backdrop-filter: var(--glass-blur);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: all var(--transition-fast);
+}
+
+.highlightCard:hover {
+    border-color: var(--border-color-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.highlightHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.highlightIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-xs);
+    background: rgba(var(--color-primary-rgb), 0.12);
+    flex-shrink: 0;
+}
+
+.highlightTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.highlightDesc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+    .contentGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .highlightsGrid {
+        grid-template-columns: 1fr;
+    }
+}

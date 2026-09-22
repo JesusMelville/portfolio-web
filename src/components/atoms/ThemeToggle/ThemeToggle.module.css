@@ -1,0 +1,59 @@
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.toggle:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-color-hover);
+    color: var(--color-primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+}
+
+.iconWrap {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sunIcon, .moonIcon {
+    position: absolute;
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.showMoon .sunIcon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+}
+
+.showMoon .moonIcon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+    color: var(--color-primary-light);
+}
+
+.showSun .sunIcon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+    color: var(--color-accent-amber);
+}
+
+.showSun .moonIcon {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
