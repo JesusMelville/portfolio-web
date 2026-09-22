@@ -6,3 +6,4 @@ export * from './CertsSection/CertsSection';
 export * from './SkillsSection/SkillsSection';
 export * from './ContactSection/ContactSection';
 export * from './Footer/Footer';
+export * from './AdminView/AdminView';

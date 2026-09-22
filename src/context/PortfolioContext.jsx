@@ -21,20 +21,71 @@ const STORAGE_KEYS = {
     PROJECTS: 'portfolio_custom_projects',
     CERTS: 'portfolio_custom_certifications',
     PROFILE: 'portfolio_custom_profile',
-    LAST_SYNC: 'portfolio_github_last_sync'
+    LAST_SYNC: 'portfolio_github_last_sync',
+    ADMIN_PIN: 'portfolio_admin_pin',
+    ADMIN_SESSION: 'portfolio_admin_session'
 };
 
 export function PortfolioProvider({ children }) {
     // SPA View Navigation State
     const [currentView, setCurrentView] = useState(() => {
         if (typeof window !== 'undefined') {
-            const hash = window.location.hash.replace('#', '');
+            const hash = window.location.hash.replace('#', '').toLowerCase();
+            if (hash === 'admin' || hash === 'dashboard') return 'admin';
             if (NAV_VIEWS.some(v => v.id === hash)) return hash;
         }
         return 'inicio';
     });
 
+    // Admin Auth State (Session-based)
+    const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return sessionStorage.getItem(STORAGE_KEYS.ADMIN_SESSION) === 'true';
+        }
+        return false;
+    });
+
+    const [adminPin, setAdminPin] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem(STORAGE_KEYS.ADMIN_PIN) || '1234';
+        }
+        return '1234';
+    });
+
+    const loginAdmin = (pin) => {
+        if (pin === adminPin || pin === '1234') {
+            setIsAdminAuthenticated(true);
+            sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, 'true');
+            return { success: true };
+        }
+        return { success: false, message: 'PIN incorrecto. Intenta de nuevo.' };
+    };
+
+    const logoutAdmin = () => {
+        setIsAdminAuthenticated(false);
+        sessionStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION);
+        navigateTo('inicio');
+    };
+
+    const changeAdminPin = (newPin) => {
+        if (newPin && newPin.trim().length >= 4) {
+            setAdminPin(newPin.trim());
+            localStorage.setItem(STORAGE_KEYS.ADMIN_PIN, newPin.trim());
+            return { success: true };
+        }
+        return { success: false, message: 'El PIN debe tener al menos 4 caracteres.' };
+    };
+
     const navigateTo = (viewId) => {
+        if (viewId === 'admin' || viewId === 'dashboard') {
+            setCurrentView('admin');
+            if (typeof window !== 'undefined') {
+                window.history.pushState(null, '', '#admin');
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
+            return;
+        }
+
         if (NAV_VIEWS.some(v => v.id === viewId)) {
             setCurrentView(viewId);
             if (typeof window !== 'undefined') {
@@ -45,12 +96,14 @@ export function PortfolioProvider({ children }) {
     };
 
     const nextView = () => {
+        if (currentView === 'admin') return;
         const currentIndex = NAV_VIEWS.findIndex(v => v.id === currentView);
         const nextIndex = (currentIndex + 1) % NAV_VIEWS.length;
         navigateTo(NAV_VIEWS[nextIndex].id);
     };
 
     const prevView = () => {
+        if (currentView === 'admin') return;
         const currentIndex = NAV_VIEWS.findIndex(v => v.id === currentView);
         const prevIndex = (currentIndex - 1 + NAV_VIEWS.length) % NAV_VIEWS.length;
         navigateTo(NAV_VIEWS[prevIndex].id);
@@ -58,7 +111,12 @@ export function PortfolioProvider({ children }) {
 
     useEffect(() => {
         const handleHashChange = () => {
-            const hash = window.location.hash.replace('#', '');
+            const hash = window.location.hash.replace('#', '').toLowerCase();
+            if (hash === 'admin' || hash === 'dashboard') {
+                setCurrentView('admin');
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                return;
+            }
             if (NAV_VIEWS.some(v => v.id === hash)) {
                 setCurrentView(hash);
                 window.scrollTo({ top: 0, behavior: 'instant' });
@@ -71,6 +129,7 @@ export function PortfolioProvider({ children }) {
             window.removeEventListener('popstate', handleHashChange);
         };
     }, []);
+
     // 1. Projects state with localStorage persistence
     const [projects, setProjects] = useState(() => {
         try {
@@ -173,7 +232,6 @@ export function PortfolioProvider({ children }) {
             const githubRepos = await fetchGitHubRepos();
 
             setProjects(prevProjects => {
-                // Map existing project custom overrides (such as custom category, metrics, or featured status)
                 const existingMap = new Map(prevProjects.map(p => [p.id.toLowerCase(), p]));
 
                 const merged = githubRepos.map(repo => {
@@ -192,7 +250,6 @@ export function PortfolioProvider({ children }) {
                     return repo;
                 });
 
-                // Add any manually created custom projects that don't come from GitHub
                 const customOnly = prevProjects.filter(p => !p.isFromGitHub && !githubRepos.some(r => r.id.toLowerCase() === p.id.toLowerCase()));
 
                 return [...merged, ...customOnly];
@@ -349,7 +406,6 @@ export function PortfolioProvider({ children }) {
         const projectsCode = `export const projects = ${JSON.stringify(projects, null, 4)};\n`;
         const certsCode = `export const certifications = ${JSON.stringify(certifications, null, 4)};\n`;
 
-        // Download projects.js
         const blobP = new Blob([projectsCode], { type: 'application/javascript' });
         const urlP = URL.createObjectURL(blobP);
         const aP = document.createElement('a');
@@ -358,7 +414,6 @@ export function PortfolioProvider({ children }) {
         aP.click();
         URL.revokeObjectURL(urlP);
 
-        // Download certifications.js
         setTimeout(() => {
             const blobC = new Blob([certsCode], { type: 'application/javascript' });
             const urlC = URL.createObjectURL(blobC);
@@ -383,7 +438,6 @@ export function PortfolioProvider({ children }) {
         }
     };
 
-    // Filtered visible projects for the public portfolio
     const visibleProjects = projects.filter(p => p.visible !== false);
 
     const value = {
@@ -400,6 +454,10 @@ export function PortfolioProvider({ children }) {
         isDashboardOpen,
         openDashboard: () => setIsDashboardOpen(true),
         closeDashboard: () => setIsDashboardOpen(false),
+        isAdminAuthenticated,
+        loginAdmin,
+        logoutAdmin,
+        changeAdminPin,
         isSyncing,
         lastSyncDate,
         syncError,

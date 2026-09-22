@@ -4,7 +4,7 @@ import { usePortfolio } from '../../../context';
 import styles from './Navbar.module.css';
 
 export function Navbar({ theme, toggleTheme }) {
-    const { openDashboard, currentView, navigateTo, navViews } = usePortfolio();
+    const { currentView, navigateTo, navViews } = usePortfolio();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const closeMenu = () => setMobileMenuOpen(false);
@@ -53,17 +53,6 @@ export function Navbar({ theme, toggleTheme }) {
                 </nav>
 
                 <div className={styles.navActions}>
-                    <button
-                        type="button"
-                        className={styles.dashboardBtn}
-                        onClick={openDashboard}
-                        title="Abrir Panel de Gestión / Dashboard"
-                        aria-label="Abrir Dashboard"
-                    >
-                        <Icon name="settings" size={18} />
-                        <span className={styles.dashBtnLabel}>Dashboard</span>
-                    </button>
-
                     <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
 
                     <Button
@@ -110,19 +99,6 @@ export function Navbar({ theme, toggleTheme }) {
                         })}
                     </ul>
                     <div className={styles.mobileActions}>
-                        <Button
-                            variant="secondary"
-                            size="md"
-                            onClick={() => {
-                                closeMenu();
-                                openDashboard();
-                            }}
-                            iconLeft={<Icon name="settings" size={18} />}
-                            className={styles.mobileCta}
-                        >
-                            Panel de Gestión (Dashboard)
-                        </Button>
-
                         <Button
                             variant="primary"
                             size="md"

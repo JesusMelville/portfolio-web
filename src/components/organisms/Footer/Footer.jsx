@@ -4,7 +4,7 @@ import { usePortfolio } from '../../../context';
 import styles from './Footer.module.css';
 
 export function Footer() {
-    const { profile, openDashboard } = usePortfolio();
+    const { profile } = usePortfolio();
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -52,16 +52,6 @@ export function Footer() {
                 </div>
 
                 <div className={styles.actions}>
-                    <button
-                        type="button"
-                        className={styles.dashFooterBtn}
-                        onClick={openDashboard}
-                        title="Abrir Panel de Control"
-                    >
-                        <Icon name="settings" size={14} />
-                        <span>Dashboard</span>
-                    </button>
-
                     <button
                         type="button"
                         onClick={scrollToTop}

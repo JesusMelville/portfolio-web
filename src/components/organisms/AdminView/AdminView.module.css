@@ -1,0 +1,635 @@
+.authSection {
+    min-height: calc(100vh - 75px - 55px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+}
+
+.authCard {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(var(--color-primary-rgb), 0.15);
+    backdrop-filter: var(--glass-blur);
+}
+
+.lockIconWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius-md);
+    background: rgba(var(--color-primary-rgb), 0.12);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.authTitle {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.authSubtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1.75rem;
+}
+
+.authForm {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.inputWrap {
+    width: 100%;
+}
+
+.pinInputField {
+    width: 100%;
+    padding: 0.9rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    text-align: center;
+    letter-spacing: 0.2em;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.pinInputField:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.authActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.errorAlert {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    border-radius: var(--radius-sm);
+    color: #fb7185;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+/* AUTHENTICATED ADMIN DASHBOARD */
+.adminSection {
+    min-height: calc(100vh - 75px - 55px);
+    padding: 2rem 0 4rem;
+}
+
+.adminContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.topBar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.75rem 2rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    backdrop-filter: var(--glass-blur);
+    flex-wrap: wrap;
+}
+
+.titleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.adminBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.35);
+    border-radius: var(--radius-full);
+    color: var(--color-primary-light);
+    font-size: 0.775rem;
+    font-weight: 700;
+    width: fit-content;
+    margin-bottom: 0.25rem;
+}
+
+.mainHeading {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.headingDesc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.topActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.changePinBox {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.changePinBox h4 {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.changePinForm {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.changePinInput {
+    padding: 0.5rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xs);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.pinMessage {
+    font-size: 0.825rem;
+    color: var(--color-primary-light);
+    font-weight: 600;
+}
+
+/* Tabs */
+.tabsNav {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.4rem;
+    gap: 0.4rem;
+    overflow-x: auto;
+}
+
+.tabBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.tabBtn:hover {
+    color: var(--text-primary);
+    background: var(--bg-card);
+}
+
+.tabActive {
+    background: rgba(var(--color-primary-rgb), 0.15) !important;
+    border-color: rgba(var(--color-primary-rgb), 0.35) !important;
+    color: var(--color-primary-light) !important;
+}
+
+.tabContent {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.contentToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.contentTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.contentSubtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.toolbarBtns {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Table */
+.tableWrap {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    background: var(--bg-card);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.875rem;
+}
+
+.table th {
+    padding: 0.85rem 1rem;
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background: var(--bg-glass-subtle);
+}
+
+.rowHidden {
+    opacity: 0.45;
+}
+
+.checkInput {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+}
+
+.starBtn {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    transition: transform var(--transition-fast);
+}
+
+.starBtn:hover {
+    transform: scale(1.2);
+}
+
+.starActive {
+    color: #fbbf24 !important;
+}
+
+.projectCell {
+    display: flex;
+    flex-direction: column;
+}
+
+.projectName {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.projectSub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.metricCount {
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    color: var(--color-primary-light);
+}
+
+.actionBtns {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.iconBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-xs);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.iconBtn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-color-hover);
+    background: var(--bg-card);
+}
+
+.deleteBtn:hover {
+    color: #f43f5e;
+    border-color: rgba(244, 63, 94, 0.4);
+    background: rgba(244, 63, 94, 0.1);
+}
+
+/* Certifications List in Admin */
+.certsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.certRowCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.certRowCard:hover {
+    border-color: var(--border-color-hover);
+}
+
+.certThumbWrap {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.certThumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.certThumbEmpty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border: 1px dashed rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-sm);
+}
+
+.certThumbPdf {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--radius-sm);
+    color: #ef4444;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.certRowInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.certRowHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.certDate {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+}
+
+.certRowTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.certIssuer {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.certRowActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Sync Card */
+.syncCard {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    flex-wrap: wrap;
+}
+
+.syncIconWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--color-primary-rgb), 0.12);
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.syncInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.syncInfo h3 {
+    font-size: 1.15rem;
+    color: var(--text-primary);
+}
+
+.syncInfo p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.lastSyncText {
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+/* Export Cards */
+.exportGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.exportCard {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.cardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--color-primary-rgb), 0.12);
+    flex-shrink: 0;
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cardContent h4 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.cardContent p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.dangerZone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.5rem 1.75rem;
+    border: 1px dashed rgba(244, 63, 94, 0.35);
+    background: rgba(244, 63, 94, 0.04);
+    border-radius: var(--radius-md);
+    flex-wrap: wrap;
+}
+
+.dangerZone h4 {
+    color: #fb7185;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.dangerZone p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 800px) {
+    .exportGrid {
+        grid-template-columns: 1fr;
+    }
+    .topBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

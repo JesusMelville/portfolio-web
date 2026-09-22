@@ -38,26 +38,6 @@ export function CertsSection() {
                     <p className={styles.sectionSubtitle}>
                         Acreditaciones, especializaciones y credenciales profesionales verificadas en desarrollo web, React, backend y arquitectura.
                     </p>
-
-                    <div className={styles.actionButtons}>
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => setIsUploadModalOpen(true)}
-                            iconLeft={<Icon name="upload" size={16} />}
-                        >
-                            + Subir Nueva Certificación
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={openDashboard}
-                            iconLeft={<Icon name="settings" size={16} />}
-                        >
-                            Administrar Certificados
-                        </Button>
-                    </div>
                 </div>
 
                 <div className={styles.controlBar}>

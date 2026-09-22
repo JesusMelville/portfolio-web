@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { ProgressBar, Icon } from '@components/atoms';
-import { DashboardModal } from '@components/molecules';
+import { ProgressBar } from '@components/atoms';
 import {
     Navbar,
     Hero,
@@ -9,7 +8,8 @@ import {
     CertsSection,
     SkillsSection,
     ContactSection,
-    Footer
+    Footer,
+    AdminView
 } from '@components/organisms';
 import { useTheme } from '@hooks';
 import { usePortfolio } from '@context';
@@ -17,16 +17,12 @@ import styles from './PortfolioTemplate.module.css';
 
 export function PortfolioTemplate() {
     const { theme, toggleTheme } = useTheme();
-    const { currentView, navigateTo, nextView, prevView, navViews } = usePortfolio();
+    const { currentView, nextView, prevView } = usePortfolio();
 
-    const currentIndex = navViews.findIndex(v => v.id === currentView);
-    const isFirst = currentIndex === 0;
-    const isLast = currentIndex === navViews.length - 1;
-
-    // Enable ArrowLeft / ArrowRight keyboard navigation between views
+    // Enable ArrowLeft / ArrowRight keyboard navigation between public views
     useEffect(() => {
+        if (currentView === 'admin') return;
         const handleKeyDown = (e) => {
-            // Ignore if in input or modal
             if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
             if (e.key === 'ArrowRight') {
                 nextView();
@@ -37,7 +33,7 @@ export function PortfolioTemplate() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [nextView, prevView]);
+    }, [nextView, prevView, currentView]);
 
     return (
         <div className={styles.templateWrap}>
@@ -63,14 +59,12 @@ export function PortfolioTemplate() {
                     {currentView === 'certificaciones' && <CertsSection />}
                     {currentView === 'habilidades' && <SkillsSection />}
                     {currentView === 'contacto' && <ContactSection />}
+                    {currentView === 'admin' && <AdminView />}
                 </div>
             </main>
 
             {/* Footer */}
             <Footer />
-
-            {/* Interactive Admin Dashboard Modal */}
-            <DashboardModal />
         </div>
     );
 }

@@ -63,27 +63,6 @@ export function ProjectsSection() {
                     <p className={styles.sectionSubtitle}>
                         Explora mis repositorios en GitHub, aplicaciones full stack, dashboards interactivos y herramientas de código abierto.
                     </p>
-
-                    <div className={styles.quickActions}>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => syncWithGitHub()}
-                            disabled={isSyncing}
-                            iconLeft={<Icon name="refresh" size={16} className={isSyncing ? styles.spin : ''} />}
-                        >
-                            {isSyncing ? 'Sincronizando...' : 'Sincronizar GitHub'}
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={openDashboard}
-                            iconLeft={<Icon name="settings" size={16} />}
-                        >
-                            Gestionar Proyectos
-                        </Button>
-                    </div>
                 </div>
 
                 {/* Filters and Search Bar */}
