@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, Badge, Icon } from '../../atoms';
 import { CertFormModal } from '../CertFormModal/CertFormModal';
 import { ProjectFormModal } from '../ProjectFormModal/ProjectFormModal';
@@ -50,7 +51,7 @@ export function DashboardModal() {
         };
     }, [isDashboardOpen, closeDashboard]);
 
-    if (!isDashboardOpen) return null;
+    if (!isDashboardOpen || typeof document === 'undefined') return null;
 
     const handleOpenAddCert = () => {
         setEditingCert(null);
@@ -91,7 +92,7 @@ export function DashboardModal() {
     const totalVisibleProjects = projects.filter(p => p.visible !== false).length;
     const totalFeaturedProjects = projects.filter(p => p.featured).length;
 
-    return (
+    return createPortal(
         <div className={styles.backdrop} onClick={closeDashboard} role="dialog" aria-modal="true">
             <div className={styles.dashboard} onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
@@ -467,6 +468,7 @@ export function DashboardModal() {
                 isOpen={Boolean(viewingCert)}
                 onClose={() => setViewingCert(null)}
             />
-        </div>
+        </div>,
+        document.body
     );
 }

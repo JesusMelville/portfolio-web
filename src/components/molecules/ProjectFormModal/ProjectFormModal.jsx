@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, Input, Textarea, Icon } from '../../atoms';
 import { projectCategories } from '../../../data';
 import styles from './ProjectFormModal.module.css';
@@ -104,9 +105,9 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
         onClose();
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || typeof document === 'undefined') return null;
 
-    return (
+    return createPortal(
         <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true">
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
@@ -297,6 +298,7 @@ export function ProjectFormModal({ project, isOpen, onClose, onSave }) {
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

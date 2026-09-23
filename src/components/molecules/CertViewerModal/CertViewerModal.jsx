@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, Icon, Badge } from '../../atoms';
 import styles from './CertViewerModal.module.css';
 
@@ -19,7 +20,7 @@ export function CertViewerModal({ cert, isOpen, onClose }) {
         };
     }, [isOpen, cert, onClose]);
 
-    if (!isOpen || !cert) return null;
+    if (!isOpen || !cert || typeof document === 'undefined') return null;
 
     const certFile = cert.certificateFile || cert.certificateImage;
     const isPdf = certFile && (certFile.startsWith('data:application/pdf') || cert.fileType === 'pdf');
@@ -33,7 +34,7 @@ export function CertViewerModal({ cert, isOpen, onClose }) {
         }
     };
 
-    return (
+    return createPortal(
         <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true">
             <div className={`${styles.modal} ${isPdf ? styles.pdfModal : ''}`} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
@@ -119,6 +120,7 @@ export function CertViewerModal({ cert, isOpen, onClose }) {
                     </Button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

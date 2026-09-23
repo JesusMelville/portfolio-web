@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Badge, Button, Icon } from '../../atoms';
 import styles from './ProjectModal.module.css';
 
@@ -21,9 +22,9 @@ export function ProjectModal({ project, onClose }) {
         };
     }, [project, onClose]);
 
-    if (!project) return null;
+    if (!project || typeof document === 'undefined') return null;
 
-    return (
+    return createPortal(
         <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true">
             <div
                 className={styles.modal}
@@ -134,6 +135,7 @@ export function ProjectModal({ project, onClose }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

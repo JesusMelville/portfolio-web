@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, Input, Textarea, Icon, Badge } from '../../atoms';
 import { certCategories } from '../../../data';
 import { detectCertDetailsFromFile } from '../../../utils/certDetector';
@@ -141,11 +142,11 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
         onClose();
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || typeof document === 'undefined') return null;
 
     const isPdf = formData.fileType === 'pdf' || (filePreview && filePreview.startsWith('data:application/pdf'));
 
-    return (
+    return createPortal(
         <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true">
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
@@ -334,6 +335,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
