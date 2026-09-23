@@ -63,11 +63,13 @@ export function DashboardModal() {
         setIsCertModalOpen(true);
     };
 
-    const handleSaveCert = (data) => {
+    const handleSaveCert = async (data) => {
+        setIsCertModalOpen(false);
+        setEditingCert(null);
         if (editingCert) {
-            updateCertification(editingCert.id, data);
+            await updateCertification(editingCert.id, data);
         } else {
-            addCertification(data);
+            await addCertification(data);
         }
     };
 
@@ -81,11 +83,13 @@ export function DashboardModal() {
         setIsProjectModalOpen(true);
     };
 
-    const handleSaveProject = (data) => {
+    const handleSaveProject = async (data) => {
+        setIsProjectModalOpen(false);
+        setEditingProject(null);
         if (editingProject) {
-            updateProject(editingProject.id || editingProject.name, data);
+            await updateProject(editingProject.id || editingProject.name, data);
         } else {
-            addProject(data);
+            await addProject(data);
         }
     };
 

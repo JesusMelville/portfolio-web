@@ -16,6 +16,7 @@ import {
     uploadBytes,
     getDownloadURL
 } from 'firebase/storage';
+import { ensureSafeBase64Size } from '../utils/fileCompressor';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCTbH7auBnfuIoD_6cIX6fpFDD6IE4_o3c",
@@ -124,20 +125,19 @@ export async function saveCertificationToCloud(cert) {
 
     let finalFileUrl = cert.certificateFile || cert.certificateImage || null;
 
-    // If file is raw base64, try to upload to Firebase Storage to keep Firestore docs small & fast
+    // If file is raw base64, try to upload to Firebase Storage or ensure compressed safe size
     if (finalFileUrl && typeof finalFileUrl === 'string' && finalFileUrl.startsWith('data:')) {
         try {
             const storageUrl = await uploadCertificateFile(finalFileUrl, cert.fileName);
             if (storageUrl && storageUrl.startsWith('http')) {
                 finalFileUrl = storageUrl;
+            } else {
+                // Ensure safe base64 size for direct Firestore storage (< 400KB)
+                finalFileUrl = await ensureSafeBase64Size(finalFileUrl);
             }
         } catch (e) {
             console.warn('Storage upload fallback:', e);
-        }
-
-        // Safety check: if storage failed and base64 is still over 900KB, warn
-        if (finalFileUrl && finalFileUrl.length > 950000) {
-            console.warn('Certificate base64 payload is large for inline document:', finalFileUrl.length);
+            finalFileUrl = await ensureSafeBase64Size(finalFileUrl);
         }
     }
 
