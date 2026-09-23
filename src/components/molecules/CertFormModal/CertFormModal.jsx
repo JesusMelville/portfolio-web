@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Button, Input, Textarea, Icon, Badge } from '../../atoms';
 import { certCategories } from '../../../data';
 import { detectCertDetailsFromFile } from '../../../utils/certDetector';
+import { compressImageFile } from '../../../utils/fileCompressor';
 import styles from './CertFormModal.module.css';
 
 export function CertFormModal({ cert, isOpen, onClose, onSave }) {
@@ -23,6 +24,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
 
     const [filePreview, setFilePreview] = useState(null);
     const [autoFillNotice, setAutoFillNotice] = useState(null);
+    const [isProcessingFile, setIsProcessingFile] = useState(false);
 
     useEffect(() => {
         if (cert) {
@@ -78,20 +80,23 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
         };
     }, [isOpen, onClose]);
 
-    const handleFileChange = (e) => {
+    const handleFileChange = async (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 4 * 1024 * 1024) {
-                alert('El archivo es demasiado grande (máximo 4MB para almacenamiento en navegador).');
-                return;
-            }
-
             const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
             const detectedType = isPdf ? 'pdf' : 'image';
 
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64Data = reader.result;
+            setIsProcessingFile(true);
+            try {
+                // Compress image automatically to ~80-150KB for instant cloud upload
+                const base64Data = await compressImageFile(file, 1280, 0.75);
+
+                if (!base64Data) {
+                    alert('No se pudo procesar el archivo seleccionado.');
+                    setIsProcessingFile(false);
+                    return;
+                }
+
                 setFilePreview(base64Data);
 
                 // Run intelligent auto-detection
@@ -109,7 +114,7 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                     skills: detected.skills || prev.skills,
                     description: detected.description || prev.description,
                     certificateFile: base64Data,
-                    certificateImage: base64Data, // backward compatibility
+                    certificateImage: base64Data,
                     fileName: file.name,
                     fileType: detectedType
                 }));
@@ -119,8 +124,11 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                     issuer: detected.issuer,
                     category: detected.category
                 });
-            };
-            reader.readAsDataURL(file);
+            } catch (err) {
+                console.error('Error processing certificate file:', err);
+            } finally {
+                setIsProcessingFile(false);
+            }
         }
     };
 

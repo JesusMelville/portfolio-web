@@ -101,6 +101,21 @@ export function subscribeToProjects(onData, onError) {
 }
 
 /**
+ * Helper to remove all undefined values (Firestore throws on undefined)
+ */
+function sanitizeForFirestore(obj) {
+    const clean = {};
+    Object.keys(obj).forEach(key => {
+        if (obj[key] !== undefined && obj[key] !== null) {
+            clean[key] = obj[key];
+        } else if (obj[key] === null) {
+            clean[key] = null;
+        }
+    });
+    return clean;
+}
+
+/**
  * Save / Add Certification to Firestore
  */
 export async function saveCertificationToCloud(cert) {
@@ -111,13 +126,23 @@ export async function saveCertificationToCloud(cert) {
 
     // If file is raw base64, try to upload to Firebase Storage to keep Firestore docs small & fast
     if (finalFileUrl && typeof finalFileUrl === 'string' && finalFileUrl.startsWith('data:')) {
-        const storageUrl = await uploadCertificateFile(finalFileUrl, cert.fileName);
-        if (storageUrl) {
-            finalFileUrl = storageUrl;
+        try {
+            const storageUrl = await uploadCertificateFile(finalFileUrl, cert.fileName);
+            if (storageUrl && storageUrl.startsWith('http')) {
+                finalFileUrl = storageUrl;
+            }
+        } catch (e) {
+            console.warn('Storage upload fallback:', e);
+        }
+
+        // Safety check: if storage failed and base64 is still over 900KB, warn
+        if (finalFileUrl && finalFileUrl.length > 950000) {
+            console.warn('Certificate base64 payload is large for inline document:', finalFileUrl.length);
         }
     }
 
-    const payload = {
+    const payload = sanitizeForFirestore({
+        id: certId,
         title: cert.title || 'Certificación Profesional',
         issuer: cert.issuer || 'Institución Emisora',
         date: cert.date || new Date().getFullYear().toString(),
@@ -125,7 +150,9 @@ export async function saveCertificationToCloud(cert) {
         url: cert.url || '',
         category: cert.category || 'ai',
         badgeColor: cert.badgeColor || '#ec4899',
-        skills: Array.isArray(cert.skills) ? cert.skills : (typeof cert.skills === 'string' ? cert.skills.split(',').map(s => s.trim()).filter(Boolean) : []),
+        skills: Array.isArray(cert.skills)
+            ? cert.skills
+            : (typeof cert.skills === 'string' ? cert.skills.split(',').map(s => s.trim()).filter(Boolean) : []),
         description: cert.description || '',
         certificateFile: finalFileUrl,
         certificateImage: finalFileUrl,
@@ -133,18 +160,21 @@ export async function saveCertificationToCloud(cert) {
         fileType: cert.fileType || 'image',
         updatedAt: Date.now(),
         createdAt: cert.createdAt || Date.now()
-    };
+    });
 
     await setDoc(certRef, payload, { merge: true });
-    return { id: certId, ...payload };
+    console.log('Successfully saved certification to Firestore:', certId);
+    return payload;
 }
 
 /**
  * Delete Certification from Firestore
  */
 export async function deleteCertificationFromCloud(id) {
+    if (!id) return;
     const certRef = doc(db, COLLECTIONS.CERTIFICATIONS, id);
     await deleteDoc(certRef);
+    console.log('Successfully deleted certification from Firestore:', id);
 }
 
 /**
@@ -154,7 +184,8 @@ export async function saveProjectToCloud(project) {
     const projectId = project.id || project.name || `proj-${Date.now()}`;
     const projectRef = doc(db, COLLECTIONS.PROJECTS, projectId);
 
-    const payload = {
+    const payload = sanitizeForFirestore({
+        id: projectId,
         title: project.title || project.name || 'Nuevo Proyecto',
         name: project.name || project.title || 'Proyecto',
         subtitle: project.subtitle || '',
@@ -166,23 +197,27 @@ export async function saveProjectToCloud(project) {
         github: project.github || project.html_url || '',
         demo: project.demo || project.homepage || '',
         color: project.color || '#8b5cf6',
-        tags: Array.isArray(project.tags) ? project.tags : (typeof project.tags === 'string' ? project.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
+        tags: Array.isArray(project.tags)
+            ? project.tags
+            : (typeof project.tags === 'string' ? project.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
         metrics: Array.isArray(project.metrics) ? project.metrics : [],
         isFromGitHub: project.isFromGitHub === true,
         updatedAt: Date.now(),
         createdAt: project.createdAt || Date.now()
-    };
+    });
 
     await setDoc(projectRef, payload, { merge: true });
-    return { id: projectId, ...payload };
+    return payload;
 }
 
 /**
  * Delete Project from Firestore
  */
 export async function deleteProjectFromCloud(id) {
+    if (!id) return;
     const projectRef = doc(db, COLLECTIONS.PROJECTS, id);
     await deleteDoc(projectRef);
+    console.log('Successfully deleted project from Firestore:', id);
 }
 
 /**
@@ -195,14 +230,17 @@ export async function seedInitialCloudData(initialProjects, initialCertification
             console.log('Seeding initial certifications to Firestore...');
             const batch = writeBatch(db);
             initialCertifications.forEach(cert => {
-                const certRef = doc(db, COLLECTIONS.CERTIFICATIONS, cert.id || `cert-${Date.now()}`);
-                batch.set(certRef, {
+                const certId = cert.id || `cert-${Date.now()}`;
+                const certRef = doc(db, COLLECTIONS.CERTIFICATIONS, certId);
+                batch.set(certRef, sanitizeForFirestore({
                     ...cert,
+                    id: certId,
                     createdAt: Date.now(),
                     updatedAt: Date.now()
-                });
+                }));
             });
             await batch.commit();
+            console.log('Seeded certifications to Firestore successfully.');
         }
 
         const projectsSnapshot = await getDocs(collection(db, COLLECTIONS.PROJECTS));
@@ -210,16 +248,20 @@ export async function seedInitialCloudData(initialProjects, initialCertification
             console.log('Seeding initial projects to Firestore...');
             const batch = writeBatch(db);
             initialProjects.forEach(proj => {
-                const projRef = doc(db, COLLECTIONS.PROJECTS, proj.id || proj.name);
-                batch.set(projRef, {
+                const projId = proj.id || proj.name;
+                const projRef = doc(db, COLLECTIONS.PROJECTS, projId);
+                batch.set(projRef, sanitizeForFirestore({
                     ...proj,
+                    id: projId,
                     createdAt: Date.now(),
                     updatedAt: Date.now()
-                });
+                }));
             });
             await batch.commit();
+            console.log('Seeded projects to Firestore successfully.');
         }
     } catch (err) {
         console.warn('Initial cloud seeding note:', err);
     }
 }
+

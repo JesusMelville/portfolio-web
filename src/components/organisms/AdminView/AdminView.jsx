@@ -21,13 +21,15 @@ export function AdminView() {
         deleteCertification,
         addCertification,
         updateCertification,
+        syncAllCertificationsToCloud,
         isSyncing,
         lastSyncDate,
         syncError,
         syncWithGitHub,
         exportDataAsJSON,
         exportDataAsJS,
-        resetToDefaults
+        resetToDefaults,
+        isCloudConnected
     } = usePortfolio();
 
     // Login Form State
@@ -342,17 +344,67 @@ export function AdminView() {
                         <div className={styles.contentToolbar}>
                             <div>
                                 <h3 className={styles.contentTitle}>Gestión de Certificaciones Oficiales</h3>
-                                <p className={styles.contentSubtitle}>Sube certificados en PDF o imagen. El sistema auto-rellenará los datos por ti.</p>
+                                <p className={styles.contentSubtitle}>
+                                    Sube certificados en PDF o imagen optimizados. Todos los cambios se guardan directamente en Firebase Firestore.
+                                </p>
                             </div>
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => setIsNewCertModalOpen(true)}
-                                iconLeft={<Icon name="upload" size={14} />}
-                            >
-                                + Subir Nueva Certificación (PDF / Imagen)
-                            </Button>
+                            <div className={styles.toolbarBtns}>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={async () => {
+                                        const res = await syncAllCertificationsToCloud();
+                                        if (res.success) {
+                                            alert(`¡Listo! Se guardaron ${res.count} certificaciones en Firebase Firestore.`);
+                                        } else {
+                                            alert(`Error al guardar en Firebase: ${res.error}`);
+                                        }
+                                    }}
+                                    disabled={isSyncing}
+                                    iconLeft={<Icon name="database" size={14} />}
+                                >
+                                    {isSyncing ? 'Guardando...' : 'Sincronizar a Firebase'}
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => setIsNewCertModalOpen(true)}
+                                    iconLeft={<Icon name="upload" size={14} />}
+                                >
+                                    + Subir Nueva Certificación (PDF / Imagen)
+                                </Button>
+                            </div>
                         </div>
+
+                        {certifications.length === 0 && (
+                            <div className={styles.emptyState}>
+                                <div className={styles.emptyIconCircle}>
+                                    <Icon name="award" size={32} color="var(--color-primary-light)" />
+                                </div>
+                                <h4>No hay certificaciones agregadas aún</h4>
+                                <p>Sube tu primer comprobante o restaura los certificados oficiales predeterminados.</p>
+                                <div className={styles.emptyActions}>
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={() => setIsNewCertModalOpen(true)}
+                                        iconLeft={<Icon name="upload" size={14} />}
+                                    >
+                                        Subir Certificado
+                                    </Button>
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={async () => {
+                                            await syncAllCertificationsToCloud();
+                                        }}
+                                        iconLeft={<Icon name="refresh" size={14} />}
+                                    >
+                                        Cargar Certificados Iniciales
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
 
                         <div className={styles.certsList}>
                             {certifications.map((cert) => {

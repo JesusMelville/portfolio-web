@@ -395,6 +395,53 @@
     background: rgba(244, 63, 94, 0.1);
 }
 
+/* Empty State */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    gap: 0.75rem;
+}
+
+.emptyIconCircle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(var(--color-primary-rgb), 0.12);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+    margin-bottom: 0.5rem;
+}
+
+.emptyState h4 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.emptyState p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    max-width: 420px;
+}
+
+.emptyActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 /* Certifications List in Admin */
 .certsList {
     display: flex;

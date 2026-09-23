@@ -199,13 +199,15 @@ export function PortfolioProvider({ children }) {
 
     // --- REALTIME FIREBASE SUBSCRIPTION ---
     useEffect(() => {
-        // 1. Seed initial data if cloud database is fresh and empty
-        seedInitialCloudData(projects, certifications);
+        // 1. Seed initial data if cloud database is fresh and empty (fallback to initial data if state is empty)
+        const certsToSeed = (certifications && certifications.length > 0) ? certifications : initialCertifications;
+        const projectsToSeed = (projects && projects.length > 0) ? projects : initialProjects;
+        seedInitialCloudData(projectsToSeed, certsToSeed);
 
         // 2. Subscribe to Certifications Real-time
         const unsubscribeCerts = subscribeToCertifications(
             (cloudCerts) => {
-                if (cloudCerts && cloudCerts.length > 0) {
+                if (cloudCerts) {
                     setCertifications(cloudCerts);
                     setIsCloudConnected(true);
                     try {
@@ -346,7 +348,7 @@ export function PortfolioProvider({ children }) {
         };
 
         // Optimistic local update
-        setCertifications(prev => [certWithId, ...prev]);
+        setCertifications(prev => [certWithId, ...prev.filter(c => c.id !== certWithId.id)]);
 
         // Save to Firebase Cloud
         try {
@@ -366,7 +368,7 @@ export function PortfolioProvider({ children }) {
                 : (typeof updatedData.skills === 'string' ? updatedData.skills.split(',').map(s => s.trim()).filter(Boolean) : []))
             : existing.skills;
 
-        const merged = { ...existing, ...updatedData, skills };
+        const merged = { ...existing, ...updatedData, id, skills };
 
         setCertifications(prev => prev.map(cert => (cert.id === id ? merged : cert)));
 
@@ -383,6 +385,22 @@ export function PortfolioProvider({ children }) {
             await deleteCertificationFromCloud(id);
         } catch (err) {
             console.error('Error deleting certification in Firebase:', err);
+        }
+    };
+
+    const syncAllCertificationsToCloud = async () => {
+        setIsSyncing(true);
+        try {
+            const listToSync = certifications.length > 0 ? certifications : initialCertifications;
+            for (const cert of listToSync) {
+                await saveCertificationToCloud(cert);
+            }
+            return { success: true, count: listToSync.length };
+        } catch (err) {
+            console.error('Error batch syncing certifications to Firebase:', err);
+            return { success: false, error: err.message };
+        } finally {
+            setIsSyncing(false);
         }
     };
 
@@ -561,6 +579,7 @@ export function PortfolioProvider({ children }) {
         addCertification,
         updateCertification,
         deleteCertification,
+        syncAllCertificationsToCloud,
         addProject,
         updateProject,
         deleteProject,
