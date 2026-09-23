@@ -117,7 +117,7 @@ function sanitizeForFirestore(obj) {
 }
 
 /**
- * Save / Add Certification to Firestore
+ * Save / Add Certification to Firestore (Direct Firestore Document Persistence)
  */
 export async function saveCertificationToCloud(cert) {
     const certId = cert.id || `cert-${Date.now()}`;
@@ -125,19 +125,12 @@ export async function saveCertificationToCloud(cert) {
 
     let finalFileUrl = cert.certificateFile || cert.certificateImage || null;
 
-    // If file is raw base64, try to upload to Firebase Storage or ensure compressed safe size
+    // Ensure image / PDF is lightweight and safe for Firestore (< 400KB)
     if (finalFileUrl && typeof finalFileUrl === 'string' && finalFileUrl.startsWith('data:')) {
         try {
-            const storageUrl = await uploadCertificateFile(finalFileUrl, cert.fileName);
-            if (storageUrl && storageUrl.startsWith('http')) {
-                finalFileUrl = storageUrl;
-            } else {
-                // Ensure safe base64 size for direct Firestore storage (< 400KB)
-                finalFileUrl = await ensureSafeBase64Size(finalFileUrl);
-            }
+            finalFileUrl = await ensureSafeBase64Size(finalFileUrl, 500000, cert.fileName);
         } catch (e) {
-            console.warn('Storage upload fallback:', e);
-            finalFileUrl = await ensureSafeBase64Size(finalFileUrl);
+            console.warn('Base64 safe size note:', e);
         }
     }
 
