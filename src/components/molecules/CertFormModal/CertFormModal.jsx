@@ -188,7 +188,19 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                                 </label>
                             </div>
 
-                            {filePreview ? (
+                            {isProcessingFile ? (
+                                <div className={styles.dropzone}>
+                                    <div className={styles.spin} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                                        <Icon name="refresh" size={28} color="var(--color-primary-light)" />
+                                    </div>
+                                    <span className={styles.dropText}>
+                                        <strong>Procesando y convirtiendo Certificado PDF a alta definición...</strong>
+                                    </span>
+                                    <span className={styles.dropSubtext}>
+                                        Optimizando documento para almacenamiento ultrarrápido en la nube.
+                                    </span>
+                                </div>
+                            ) : filePreview ? (
                                 <div className={styles.previewContainer}>
                                     {isPdf ? (
                                         <div className={styles.pdfPreviewBox}>
@@ -337,8 +349,14 @@ export function CertFormModal({ cert, isOpen, onClose, onSave }) {
                         <Button type="button" variant="ghost" size="md" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button type="submit" variant="primary" size="md" iconLeft={<Icon name="check" size={18} />}>
-                            {cert ? 'Guardar Cambios' : 'Subir Certificación'}
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            size="md"
+                            disabled={isProcessingFile}
+                            iconLeft={<Icon name={isProcessingFile ? "refresh" : "check"} size={18} className={isProcessingFile ? styles.spin : ''} />}
+                        >
+                            {isProcessingFile ? 'Procesando Documento...' : (cert ? 'Guardar Cambios' : 'Subir Certificación')}
                         </Button>
                     </div>
                 </form>
