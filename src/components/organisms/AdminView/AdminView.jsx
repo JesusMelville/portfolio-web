@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, Input, Icon, Badge } from '../../atoms';
 import { ProjectFormModal, CertFormModal, CertViewerModal } from '../../molecules';
 import { usePortfolio } from '../../../context';
@@ -43,6 +44,16 @@ export function AdminView() {
     const [editingCert, setEditingCert] = useState(null);
     const [isNewCertModalOpen, setIsNewCertModalOpen] = useState(false);
     const [viewingCert, setViewingCert] = useState(null);
+
+    // Toast State
+    const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
+
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => {
+            setToast(null);
+        }, 3500);
+    };
 
     // Change PIN state
     const [isChangePinOpen, setIsChangePinOpen] = useState(false);
@@ -238,7 +249,14 @@ export function AdminView() {
                                 <Button
                                     variant="secondary"
                                     size="sm"
-                                    onClick={() => syncWithGitHub()}
+                                    onClick={async () => {
+                                        const res = await syncWithGitHub();
+                                        if (res && res.success) {
+                                            showToast('✓ Proyectos sincronizados con GitHub');
+                                        } else {
+                                            showToast(`⚠️ Error al sincronizar: ${res?.error || 'Verifica la consola'}`, 'error');
+                                        }
+                                    }}
                                     disabled={isSyncing}
                                     iconLeft={<Icon name="refresh" size={14} className={isSyncing ? styles.spin : ''} />}
                                 >
@@ -276,7 +294,10 @@ export function AdminView() {
                                                     <input
                                                         type="checkbox"
                                                         checked={!isHidden}
-                                                        onChange={() => toggleProjectVisibility(p.id || p.name)}
+                                                        onChange={async () => {
+                                                            const res = await toggleProjectVisibility(p.id || p.name);
+                                                            if (res && res.success) showToast('✓ Visibilidad actualizada en Firebase');
+                                                        }}
                                                         className={styles.checkInput}
                                                         title="Mostrar u ocultar del portafolio público"
                                                     />
@@ -285,7 +306,10 @@ export function AdminView() {
                                                     <button
                                                         type="button"
                                                         className={`${styles.starBtn} ${p.featured ? styles.starActive : ''}`}
-                                                        onClick={() => toggleProjectFeatured(p.id || p.name)}
+                                                        onClick={async () => {
+                                                            const res = await toggleProjectFeatured(p.id || p.name);
+                                                            if (res && res.success) showToast(p.featured ? 'Proyecto desmarcado' : '⭐ Marcado como destacado');
+                                                        }}
                                                         title="Marcar como destacado"
                                                     >
                                                         <Icon name="star" size={18} />
@@ -318,9 +342,14 @@ export function AdminView() {
                                                         <button
                                                             type="button"
                                                             className={`${styles.iconBtn} ${styles.deleteBtn}`}
-                                                            onClick={() => {
+                                                            onClick={async () => {
                                                                 if (window.confirm(`¿Eliminar proyecto "${p.title || p.name}"?`)) {
-                                                                    deleteProject(p.id || p.name);
+                                                                    const res = await deleteProject(p.id || p.name);
+                                                                    if (res && res.success) {
+                                                                        showToast('✓ Proyecto eliminado de Firebase');
+                                                                    } else {
+                                                                        showToast('⚠️ No se pudo eliminar', 'error');
+                                                                    }
                                                                 }
                                                             }}
                                                             title="Eliminar Proyecto"
@@ -354,10 +383,10 @@ export function AdminView() {
                                     size="sm"
                                     onClick={async () => {
                                         const res = await syncAllCertificationsToCloud();
-                                        if (res.success) {
-                                            alert(`¡Listo! Se guardaron ${res.count} certificaciones en Firebase Firestore.`);
+                                        if (res && res.success) {
+                                            showToast(`✓ Sincronizadas ${res.count} certificaciones en Firebase`);
                                         } else {
-                                            alert(`Error al guardar en Firebase: ${res.error}`);
+                                            showToast(`⚠️ Error al guardar: ${res?.error || 'Revisa conexión'}`, 'error');
                                         }
                                     }}
                                     disabled={isSyncing}
@@ -382,7 +411,7 @@ export function AdminView() {
                                     <Icon name="award" size={32} color="var(--color-primary-light)" />
                                 </div>
                                 <h4>No hay certificaciones agregadas aún</h4>
-                                <p>Sube tu primer comprobante o restaura los certificados oficiales predeterminados.</p>
+                                <p>Sube tu primer comprobante en formato PDF o imagen para comenzar.</p>
                                 <div className={styles.emptyActions}>
                                     <Button
                                         variant="primary"
@@ -391,16 +420,6 @@ export function AdminView() {
                                         iconLeft={<Icon name="upload" size={14} />}
                                     >
                                         Subir Certificado
-                                    </Button>
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        onClick={async () => {
-                                            await syncAllCertificationsToCloud();
-                                        }}
-                                        iconLeft={<Icon name="refresh" size={14} />}
-                                    >
-                                        Cargar Certificados Iniciales
                                     </Button>
                                 </div>
                             </div>
@@ -460,9 +479,14 @@ export function AdminView() {
                                             <button
                                                 type="button"
                                                 className={`${styles.iconBtn} ${styles.deleteBtn}`}
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     if (window.confirm(`¿Eliminar certificación "${cert.title}"?`)) {
-                                                        deleteCertification(cert.id);
+                                                        const res = await deleteCertification(cert.id);
+                                                        if (res && res.success) {
+                                                            showToast('✓ Certificación eliminada de Firebase');
+                                                        } else {
+                                                            showToast('⚠️ No se pudo eliminar', 'error');
+                                                        }
                                                     }
                                                 }}
                                                 title="Eliminar Certificación"
@@ -494,7 +518,14 @@ export function AdminView() {
                             <Button
                                 variant="primary"
                                 size="md"
-                                onClick={() => syncWithGitHub()}
+                                onClick={async () => {
+                                    const res = await syncWithGitHub();
+                                    if (res && res.success) {
+                                        showToast('✓ Sincronización con GitHub completada');
+                                    } else {
+                                        showToast('⚠️ Error al sincronizar con GitHub', 'error');
+                                    }
+                                }}
                                 disabled={isSyncing}
                                 iconLeft={<Icon name="refresh" size={18} className={isSyncing ? styles.spin : ''} />}
                             >
@@ -521,7 +552,7 @@ export function AdminView() {
                                 <div className={styles.cardContent}>
                                     <h4>Descargar Archivos de Código (.js)</h4>
                                     <p>Genera y descarga <code>projects.js</code> y <code>certifications.js</code> listos para guardar en tu carpeta <code>src/data/</code> y hacer commit en git.</p>
-                                    <Button variant="primary" size="sm" onClick={exportDataAsJS} iconLeft={<Icon name="download" size={16} />}>
+                                    <Button variant="primary" size="sm" onClick={() => { exportDataAsJS(); showToast('✓ Archivos .js generados'); }} iconLeft={<Icon name="download" size={16} />}>
                                         Descargar projects.js y certs.js
                                     </Button>
                                 </div>
@@ -534,7 +565,7 @@ export function AdminView() {
                                 <div className={styles.cardContent}>
                                     <h4>Copia de Seguridad JSON</h4>
                                     <p>Descarga un archivo JSON con todos tus proyectos, certificaciones y configuraciones para restauración rápida.</p>
-                                    <Button variant="secondary" size="sm" onClick={exportDataAsJSON} iconLeft={<Icon name="download" size={16} />}>
+                                    <Button variant="secondary" size="sm" onClick={() => { exportDataAsJSON(); showToast('✓ Backup JSON generado'); }} iconLeft={<Icon name="download" size={16} />}>
                                         Exportar Backup JSON
                                     </Button>
                                 </div>
@@ -546,7 +577,7 @@ export function AdminView() {
                                 <h4>Restablecer Valores Iniciales</h4>
                                 <p>Restaura proyectos y certificaciones a sus estados por defecto y limpia el almacenamiento del navegador.</p>
                             </div>
-                            <Button variant="outline" size="sm" onClick={resetToDefaults} iconLeft={<Icon name="trash" size={16} color="#f43f5e" />}>
+                            <Button variant="outline" size="sm" onClick={() => { resetToDefaults(); showToast('✓ Datos restablecidos'); }} iconLeft={<Icon name="trash" size={16} color="#f43f5e" />}>
                                 Restablecer Todo
                             </Button>
                         </div>
@@ -563,14 +594,25 @@ export function AdminView() {
                         setIsNewProjectModalOpen(false);
                         setEditingProject(null);
                     }}
-                    onSave={(data) => {
-                        if (editingProject) {
-                            updateProject(editingProject.id || editingProject.name, data);
-                        } else {
-                            addProject(data);
-                        }
+                    onSave={async (data) => {
                         setIsNewProjectModalOpen(false);
                         setEditingProject(null);
+                        let res;
+                        if (editingProject) {
+                            res = await updateProject(editingProject.id || editingProject.name, data);
+                            if (res && res.success) {
+                                showToast('✓ Proyecto actualizado en Firebase');
+                            } else {
+                                showToast(`⚠️ Error al guardar: ${res?.error || 'Revisa Firestore'}`, 'error');
+                            }
+                        } else {
+                            res = await addProject(data);
+                            if (res && res.success) {
+                                showToast('✓ Proyecto creado y guardado en Firebase');
+                            } else {
+                                showToast(`⚠️ Error al crear: ${res?.error || 'Revisa Firestore'}`, 'error');
+                            }
+                        }
                     }}
                 />
             )}
@@ -584,14 +626,25 @@ export function AdminView() {
                         setIsNewCertModalOpen(false);
                         setEditingCert(null);
                     }}
-                    onSave={(data) => {
-                        if (editingCert) {
-                            updateCertification(editingCert.id, data);
-                        } else {
-                            addCertification(data);
-                        }
+                    onSave={async (data) => {
                         setIsNewCertModalOpen(false);
                         setEditingCert(null);
+                        let res;
+                        if (editingCert) {
+                            res = await updateCertification(editingCert.id, data);
+                            if (res && res.success) {
+                                showToast('✓ Certificación actualizada en Firebase');
+                            } else {
+                                showToast(`⚠️ Error al actualizar: ${res?.error || 'Revisa Firestore'}`, 'error');
+                            }
+                        } else {
+                            res = await addCertification(data);
+                            if (res && res.success) {
+                                showToast('✓ Certificación guardada en Firebase con éxito');
+                            } else {
+                                showToast(`⚠️ Error al guardar: ${res?.error || 'Revisa Firestore'}`, 'error');
+                            }
+                        }
                     }}
                 />
             )}
@@ -604,6 +657,16 @@ export function AdminView() {
                     onClose={() => setViewingCert(null)}
                 />
             )}
+
+            {/* Toast Floating Notification Portal */}
+            {toast && typeof document !== 'undefined' && createPortal(
+                <div className={`${styles.toastNotification} ${toast.type === 'error' ? styles.toastError : styles.toastSuccess}`}>
+                    <Icon name={toast.type === 'error' ? 'alert-triangle' : 'check'} size={18} />
+                    <span>{toast.message}</span>
+                </div>,
+                document.body
+            )}
         </section>
     );
 }
+

@@ -199,10 +199,10 @@ export function PortfolioProvider({ children }) {
 
     // --- REALTIME FIREBASE SUBSCRIPTION ---
     useEffect(() => {
-        // 1. Seed initial data if cloud database is fresh and empty (fallback to initial data if state is empty)
-        const certsToSeed = (certifications && certifications.length > 0) ? certifications : initialCertifications;
-        const projectsToSeed = (projects && projects.length > 0) ? projects : initialProjects;
-        seedInitialCloudData(projectsToSeed, certsToSeed);
+        // Seed initial projects only if cloud is completely fresh
+        if (projects && projects.length > 0) {
+            seedInitialCloudData(initialProjects, []);
+        }
 
         // 2. Subscribe to Certifications Real-time
         const unsubscribeCerts = subscribeToCertifications(
@@ -313,11 +313,13 @@ export function PortfolioProvider({ children }) {
             const now = new Date().toISOString();
             setLastSyncDate(now);
             localStorage.setItem(STORAGE_KEYS.LAST_SYNC, now);
+            return { success: true };
         } catch (err) {
             setSyncError(err.message);
             if (showErrorToast) {
                 console.error('GitHub sync failed:', err);
             }
+            return { success: false, error: err.message };
         } finally {
             setIsSyncing(false);
         }
@@ -353,11 +355,11 @@ export function PortfolioProvider({ children }) {
         // Save to Firebase Cloud
         try {
             await saveCertificationToCloud(certWithId);
+            return { success: true, data: certWithId };
         } catch (err) {
             console.error('Error saving certification to Firebase:', err);
+            return { success: false, error: err.message };
         }
-
-        return certWithId;
     };
 
     const updateCertification = async (id, updatedData) => {
@@ -374,8 +376,10 @@ export function PortfolioProvider({ children }) {
 
         try {
             await saveCertificationToCloud(merged);
+            return { success: true, data: merged };
         } catch (err) {
             console.error('Error updating certification in Firebase:', err);
+            return { success: false, error: err.message };
         }
     };
 
@@ -383,15 +387,17 @@ export function PortfolioProvider({ children }) {
         setCertifications(prev => prev.filter(cert => cert.id !== id));
         try {
             await deleteCertificationFromCloud(id);
+            return { success: true };
         } catch (err) {
             console.error('Error deleting certification in Firebase:', err);
+            return { success: false, error: err.message };
         }
     };
 
     const syncAllCertificationsToCloud = async () => {
         setIsSyncing(true);
         try {
-            const listToSync = certifications.length > 0 ? certifications : initialCertifications;
+            const listToSync = certifications;
             for (const cert of listToSync) {
                 await saveCertificationToCloud(cert);
             }
@@ -418,6 +424,7 @@ export function PortfolioProvider({ children }) {
             title: 'Nuevo Proyecto',
             subtitle: '',
             description: '',
+            longDescription: '',
             category: 'frontend',
             featured: false,
             visible: true,
@@ -436,11 +443,11 @@ export function PortfolioProvider({ children }) {
 
         try {
             await saveProjectToCloud(projectWithId);
+            return { success: true, data: projectWithId };
         } catch (err) {
             console.error('Error saving project to Firebase:', err);
+            return { success: false, error: err.message };
         }
-
-        return projectWithId;
     };
 
     const updateProject = async (id, updatedData) => {
@@ -461,8 +468,10 @@ export function PortfolioProvider({ children }) {
 
         try {
             await saveProjectToCloud(merged);
+            return { success: true, data: merged };
         } catch (err) {
             console.error('Error updating project in Firebase:', err);
+            return { success: false, error: err.message };
         }
     };
 
@@ -470,8 +479,10 @@ export function PortfolioProvider({ children }) {
         setProjects(prev => prev.filter(p => p.id !== id && p.name !== id));
         try {
             await deleteProjectFromCloud(id);
+            return { success: true };
         } catch (err) {
             console.error('Error deleting project in Firebase:', err);
+            return { success: false, error: err.message };
         }
     };
 
@@ -482,8 +493,10 @@ export function PortfolioProvider({ children }) {
         setProjects(prev => prev.map(p => (p.id === id || p.name === id ? updated : p)));
         try {
             await saveProjectToCloud(updated);
+            return { success: true };
         } catch (err) {
             console.error('Error toggling project visibility:', err);
+            return { success: false, error: err.message };
         }
     };
 
@@ -494,8 +507,10 @@ export function PortfolioProvider({ children }) {
         setProjects(prev => prev.map(p => (p.id === id || p.name === id ? updated : p)));
         try {
             await saveProjectToCloud(updated);
+            return { success: true };
         } catch (err) {
             console.error('Error toggling project featured:', err);
+            return { success: false, error: err.message };
         }
     };
 

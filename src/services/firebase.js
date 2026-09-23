@@ -190,6 +190,7 @@ export async function saveProjectToCloud(project) {
         name: project.name || project.title || 'Proyecto',
         subtitle: project.subtitle || '',
         description: project.description || '',
+        longDescription: project.longDescription || project.description || '',
         customDescription: project.customDescription || project.description || '',
         category: project.category || 'frontend',
         featured: project.featured === true,
@@ -201,12 +202,14 @@ export async function saveProjectToCloud(project) {
             ? project.tags
             : (typeof project.tags === 'string' ? project.tags.split(',').map(t => t.trim()).filter(Boolean) : []),
         metrics: Array.isArray(project.metrics) ? project.metrics : [],
+        features: Array.isArray(project.features) ? project.features : [],
         isFromGitHub: project.isFromGitHub === true,
         updatedAt: Date.now(),
         createdAt: project.createdAt || Date.now()
     });
 
     await setDoc(projectRef, payload, { merge: true });
+    console.log('Successfully saved project to Firestore:', projectId);
     return payload;
 }
 
@@ -221,44 +224,48 @@ export async function deleteProjectFromCloud(id) {
 }
 
 /**
- * Seed initial local data into Firestore if cloud is empty
+ * Seed initial local data into Firestore only when explicitly requested
  */
-export async function seedInitialCloudData(initialProjects, initialCertifications) {
+export async function seedInitialCloudData(initialProjects = [], initialCertifications = []) {
     try {
-        const certsSnapshot = await getDocs(collection(db, COLLECTIONS.CERTIFICATIONS));
-        if (certsSnapshot.empty && initialCertifications && initialCertifications.length > 0) {
-            console.log('Seeding initial certifications to Firestore...');
-            const batch = writeBatch(db);
-            initialCertifications.forEach(cert => {
-                const certId = cert.id || `cert-${Date.now()}`;
-                const certRef = doc(db, COLLECTIONS.CERTIFICATIONS, certId);
-                batch.set(certRef, sanitizeForFirestore({
-                    ...cert,
-                    id: certId,
-                    createdAt: Date.now(),
-                    updatedAt: Date.now()
-                }));
-            });
-            await batch.commit();
-            console.log('Seeded certifications to Firestore successfully.');
+        if (initialCertifications && initialCertifications.length > 0) {
+            const certsSnapshot = await getDocs(collection(db, COLLECTIONS.CERTIFICATIONS));
+            if (certsSnapshot.empty) {
+                console.log('Seeding initial certifications to Firestore...');
+                const batch = writeBatch(db);
+                initialCertifications.forEach(cert => {
+                    const certId = cert.id || `cert-${Date.now()}`;
+                    const certRef = doc(db, COLLECTIONS.CERTIFICATIONS, certId);
+                    batch.set(certRef, sanitizeForFirestore({
+                        ...cert,
+                        id: certId,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    }));
+                });
+                await batch.commit();
+                console.log('Seeded certifications to Firestore successfully.');
+            }
         }
 
-        const projectsSnapshot = await getDocs(collection(db, COLLECTIONS.PROJECTS));
-        if (projectsSnapshot.empty && initialProjects && initialProjects.length > 0) {
-            console.log('Seeding initial projects to Firestore...');
-            const batch = writeBatch(db);
-            initialProjects.forEach(proj => {
-                const projId = proj.id || proj.name;
-                const projRef = doc(db, COLLECTIONS.PROJECTS, projId);
-                batch.set(projRef, sanitizeForFirestore({
-                    ...proj,
-                    id: projId,
-                    createdAt: Date.now(),
-                    updatedAt: Date.now()
-                }));
-            });
-            await batch.commit();
-            console.log('Seeded projects to Firestore successfully.');
+        if (initialProjects && initialProjects.length > 0) {
+            const projectsSnapshot = await getDocs(collection(db, COLLECTIONS.PROJECTS));
+            if (projectsSnapshot.empty) {
+                console.log('Seeding initial projects to Firestore...');
+                const batch = writeBatch(db);
+                initialProjects.forEach(proj => {
+                    const projId = proj.id || proj.name;
+                    const projRef = doc(db, COLLECTIONS.PROJECTS, projId);
+                    batch.set(projRef, sanitizeForFirestore({
+                        ...proj,
+                        id: projId,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    }));
+                });
+                await batch.commit();
+                console.log('Seeded projects to Firestore successfully.');
+            }
         }
     } catch (err) {
         console.warn('Initial cloud seeding note:', err);
