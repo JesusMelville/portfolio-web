@@ -1,10 +1,4 @@
-import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
-// Set up pdf.js worker using Vite's bundled worker URL
-if (typeof window !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-}
+import * as pdfjsLib from 'pdfjs-dist/webpack.mjs';
 
 /**
  * Generate a visual diploma card in Canvas if a PDF is encrypted or cannot be parsed
